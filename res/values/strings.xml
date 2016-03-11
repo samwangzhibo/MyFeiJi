@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">FeiJi</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="NewGame">无尽模式</string>
+    <string name="Scores">Scores</string>
+    <string name="ExitGame">Exit Game</string>
+    <string name="Return">Return</string>
+    <string name="Return_Menu">返回菜单</string>
+     <string name="restart">重新开始</string>
+    <string name="FeiJiScore">飞机大战分数</string>
+    <string name="feiji_pause">飞机大战</string>
+    <string name="FeiJiScoreList">飞机大战分数排行榜</string>
+    <string name="FeiJiGuanka">关卡模式</string>
+    
+    <color name="black">#ff000000</color>
+    <color name="gray">#7B797B</color>
+    
+
+</resources>
