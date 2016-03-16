@@ -1,11 +1,11 @@
 package com.k.feiji;
 
-import com.baidu.mobstat.StatService;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.widget.ImageView;
+
+import com.baidu.mobstat.StatService;
 
 public class FeiJi_Wel extends FeiJi_BaseAc {
 
@@ -34,7 +34,6 @@ public class FeiJi_Wel extends FeiJi_BaseAc {
 
 			@Override
 			public void run() {
-				// TODO Auto-generated method stub
 				if (_Chage == 0) {
 					_FeiJi_Wel_Animal
 							.setBackgroundResource(R.drawable.feiji_back_2);

@@ -1,32 +1,35 @@
 package com.k.feiji;
 
+import android.os.Bundle;
+import android.view.KeyEvent;
+
+import com.baidu.mobstat.StatService;
+import com.k.feiji.util.SoundPlayer;
+
 import org.cocos2d.layers.CCScene;
 import org.cocos2d.nodes.CCDirector;
 import org.cocos2d.nodes.CCTextureCache;
 import org.cocos2d.opengl.CCGLSurfaceView;
 import org.cocos2d.types.ccColor4B;
 
-import com.baidu.mobstat.StatService;
-
-import android.os.Bundle;
-import android.view.KeyEvent;
-import android.widget.TextView;
-
 public class FeiJi_Main extends FeiJi_BaseAc {
 
 	private CCGLSurfaceView _FeiJi_Surface;
 	private CCScene _FeiJi_Scene;
+	SoundPlayer soundPlayer;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		_FeiJi_Surface = new CCGLSurfaceView(this);
 		setContentView(_FeiJi_Surface);
+
+		soundPlayer = SoundPlayer.getInstance();
+		soundPlayer.init(this);
 	}
 
 	@Override
 	protected void onDestroy() {
-		// TODO Auto-generated method stub
 		super.onDestroy();
 		CCDirector.sharedDirector().end();
 		CCTextureCache.sharedTextureCache().removeAllTextures();
@@ -34,32 +37,34 @@ public class FeiJi_Main extends FeiJi_BaseAc {
 
 	@Override
 	protected void onPause() {
-		// TODO Auto-generated method stub
 		super.onPause();
 		CCDirector.sharedDirector().pause();
 		StatService.onPause(this);
+		soundPlayer.pauseMusic();
 	}
 
 	@Override
 	protected void onResume() {
-		// TODO Auto-generated method stub
 		super.onResume();
-		CCDirector.sharedDirector().resume();
+		if (!FeiJi_Play.getIsClickPause()){
+			CCDirector.sharedDirector().resume();
+		}
 		StatService.onResume(this);
+		soundPlayer.startMusic();
 	}
 
 	@Override
 	protected void onStart() {
-		// TODO Auto-generated method stub
 		super.onStart();
-		// cocos2dÀïÏ°¹ßÒÔ×óÏÂ½Ç×÷ÎªÔ­µã,Ê±¼äµ¥Î»ÊÇÃë
-		CCDirector.sharedDirector().attachInView(_FeiJi_Surface);// °Ñcocos2d°ó¶¨ÔÚGLSurfaceViewÕâ¸öÔØÌåÉÏ
-		
-		 CCDirector.sharedDirector().setDeviceOrientation(
-		 CCDirector.kCCDeviceOrientationLandscapeLeft);
-		 //CCDirector.sharedDirector().setDisplayFPS(true);//ÏÔÊ¾ FPS
-		 CCDirector.sharedDirector().setAnimationInterval(1.0f / 60.0f);
-		// Ã¿ÃëµÄÕêÊı
+		super.onStart();
+		// cocos2dé‡Œä¹ æƒ¯ä»¥å·¦ä¸‹è§’ä½œä¸ºåŸç‚¹,æ—¶é—´å•ä½æ˜¯ç§’
+		CCDirector.sharedDirector().attachInView(_FeiJi_Surface);// æŠŠcocos2dç»‘å®šåœ¨GLSurfaceViewè¿™ä¸ªè½½ä½“ä¸Š
+
+		CCDirector.sharedDirector().setDeviceOrientation(
+				CCDirector.kCCDeviceOrientationLandscapeLeft);
+		//CCDirector.sharedDirector().setDisplayFPS(true);//æ˜¾ç¤º FPS
+		CCDirector.sharedDirector().setAnimationInterval(1.0f / 60.0f);
+		// æ¯ç§’çš„è´æ•°
 		_FeiJi_Scene = CCScene.node();
 		
 		Bundle bundle = getIntent().getExtras();
@@ -68,19 +73,18 @@ public class FeiJi_Main extends FeiJi_BaseAc {
 			iskg = bundle.getBoolean("isgk");
 		}
 		FeiJi_Play _Layer1 = new FeiJi_Play(ccColor4B.ccc4(255, 255, 255, 255),iskg);
-		FeiJi_Play2 _Layer = new FeiJi_Play2(ccColor4B.ccc4(255, 255, 255, 255));
+		//FeiJi_Play2 _Layer = new FeiJi_Play2(ccColor4B.ccc4(255, 255, 255, 255));
 //		_Layer.GetContext(FeiJi_Main.this);
-		_FeiJi_Scene.addChild(_Layer);
+		//_FeiJi_Scene.addChild(_Layer);
 		_FeiJi_Scene.addChild(_Layer1);
 		
-		CCDirector.sharedDirector().runWithScene(_FeiJi_Scene);// ÔËĞĞ³¡¾°
+		CCDirector.sharedDirector().runWithScene(_FeiJi_Scene);// è¿è¡Œåœºæ™¯
 
 		//CCDirector.sharedDirector().pause();
 	}
 
 	@Override
 	protected void onStop() {
-		// TODO Auto-generated method stub
 		super.onStop();
 		CCDirector.sharedDirector().end();
 	}

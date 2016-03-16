@@ -1,18 +1,18 @@
 package com.k.feiji.util;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import com.k.feiji.R;
- 
- 
 import android.content.Context;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.SoundPool;
+import android.util.Log;
+
+import com.k.feiji.R;
+
+import java.util.HashMap;
+import java.util.Map;
  
 /**
- * ÉùÒô¿ØÖÆÀà
+ * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
  * @author wyf
  *
  */
@@ -21,12 +21,12 @@ public class SoundPlayer {
     private static MediaPlayer music;
     private static SoundPool soundPool;
      
-    private static boolean musicSt = true; //ÒôÀÖ¿ª¹Ø
-    private static boolean soundSt = true; //ÒôÐ§¿ª¹Ø
+    private static boolean musicSt = true; //ï¿½ï¿½ï¿½Ö¿ï¿½ï¿½ï¿½
+    private static boolean soundSt = true; //ï¿½ï¿½Ð§ï¿½ï¿½ï¿½ï¿½
     private static Context context;
      
     private static final int musicId = R.raw.game_music;
-    private static Map<Integer,Integer> soundMap; //ÒôÐ§×ÊÔ´idÓë¼ÓÔØ¹ýºóµÄÒôÔ´idµÄÓ³Éä¹ØÏµ±í
+    private static Map<Integer,Integer> soundMap; //ï¿½ï¿½Ð§ï¿½ï¿½Ô´idï¿½ï¿½ï¿½ï¿½Ø¹ï¿½ï¿½ï¿½ï¿½ï¿½Ô´idï¿½ï¿½Ó³ï¿½ï¿½ï¿½Ïµï¿½ï¿½
     public static SoundPlayer instance;
     public synchronized static SoundPlayer getInstance(){
     	 if(instance == null){
@@ -35,7 +35,7 @@ public class SoundPlayer {
     	 return instance;
      }
     /**
-     * ³õÊ¼»¯·½·¨
+     * ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
      * @param c
      */
     public static void init(Context c)
@@ -47,7 +47,7 @@ public class SoundPlayer {
         initSound();
     }
      
-    //³õÊ¼»¯ÒôÐ§²¥·ÅÆ÷
+    //ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½Ð§ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     private static void initSound()
     {
         soundPool = new SoundPool(10,AudioManager.STREAM_MUSIC,100);
@@ -55,10 +55,10 @@ public class SoundPlayer {
         soundMap = new HashMap<Integer,Integer>();
         soundMap.put(R.raw.bullet, soundPool.load(context, R.raw.bullet, 1));
         soundMap.put(R.raw.game_over, soundPool.load(context, R.raw.game_over, 1));
-        soundMap.put(R.raw.get_bomb, soundPool.load(context,R.raw.get_bomb, 1));
+        soundMap.put(R.raw.get_bomb, soundPool.load(context, R.raw.get_bomb, 1));
     }
      
-    //³õÊ¼»¯ÒôÀÖ²¥·ÅÆ÷
+    //ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½Ö²ï¿½ï¿½ï¿½ï¿½ï¿½
     private static void initMusic()
     {
         music = MediaPlayer.create(context,musicId);
@@ -66,8 +66,8 @@ public class SoundPlayer {
     }
      
     /**
-     * ²¥·ÅÒôÐ§
-     * @param resId ÒôÐ§×ÊÔ´id
+     * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð§
+     * @param resId ï¿½ï¿½Ð§ï¿½ï¿½Ô´id
      */
     public static void playSound(int resId)
     {
@@ -80,26 +80,29 @@ public class SoundPlayer {
     }
  
     /**
-     * ÔÝÍ£ÒôÀÖ
+     * ï¿½ï¿½Í£ï¿½ï¿½ï¿½ï¿½
      */
     public static void pauseMusic()
-    {
-        if(music.isPlaying())
+    {   try{
+        if(music != null && music.isPlaying())
             music.pause();
+        }catch (Exception e){
+        e.printStackTrace();
+    }
     }
      
-    /**
-     * ²¥·ÅÒôÀÖ
-     */
+
     public static void startMusic()
-    {
-        if(musicSt)
+    {   try {
+        if(musicSt && music != null)
             music.start();
+         }catch (Exception e){
+        Log.e("SoundPlay : 100 ---- ",e.toString());
+    }
+
     }
      
-    /**
-     * ÇÐ»»Ò»Ê×ÒôÀÖ²¢²¥·Å
-     */
+
     public static void changeAndPlayMusic()
     {
         if(music != null)
@@ -109,7 +112,7 @@ public class SoundPlayer {
     }
      
     /**
-     * »ñµÃÒôÀÖ¿ª¹Ø×´Ì¬
+     * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¿ï¿½ï¿½ï¿½×´Ì¬
      * @return
      */
     public static boolean isMusicSt() {
@@ -117,7 +120,7 @@ public class SoundPlayer {
     }
      
     /**
-     * ÉèÖÃÒôÀÖ¿ª¹Ø
+     * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¿ï¿½ï¿½ï¿½
      * @param musicSt
      */
     public static void setMusicSt(boolean musicSt) {
@@ -129,20 +132,20 @@ public class SoundPlayer {
     }
  
     /**
-     * »ñµÃÒôÐ§¿ª¹Ø×´Ì¬
+     * ï¿½ï¿½ï¿½ï¿½ï¿½Ð§ï¿½ï¿½ï¿½ï¿½×´Ì¬
      * @return
      */
     public static boolean isSoundSt() {
         return soundSt;
     }
     public void releseMusic(){
-    	if(musicSt)
+    	if(musicSt && music != null)
             music.stop();
     	music.release();
     }
  
     /**
-     * ÉèÖÃÒôÐ§¿ª¹Ø
+     * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð§ï¿½ï¿½ï¿½ï¿½
      * @param soundSt
      */
     public static void setSoundSt(boolean soundSt) {
@@ -150,7 +153,7 @@ public class SoundPlayer {
     }
      
     /**
-     * ·¢³ö¡®biu¡¯µÄÉùÒô
+     * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½biuï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
      */
     public static void biu()
     {

@@ -1,13 +1,13 @@
 package com.k.feiji;
 
-import com.baidu.mobstat.StatService;
-import com.k.feiji.util.SoundPlayer;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+
+import com.baidu.mobstat.StatService;
+import com.k.feiji.util.SoundPlayer;
 
 public class FeiJi_Menu extends FeiJi_BaseAc implements OnClickListener{
 
@@ -22,7 +22,6 @@ public class FeiJi_Menu extends FeiJi_BaseAc implements OnClickListener{
 	}
 
 	private void Init() {
-		// TODO Auto-generated method stub
 		_FeiJi_Button_New = (Button) findViewById(R.id.feiji_bu_new);
 		_FeiJi_Button_Score = (Button) findViewById(R.id.feiji_bu_score);
 		_FeiJi_Button_Exit = (Button) findViewById(R.id.feiji_bu_exit);
@@ -41,10 +40,9 @@ public class FeiJi_Menu extends FeiJi_BaseAc implements OnClickListener{
 	
 	public void onResume() {
 		super.onResume();
-
 		/**
-		 * ҳ����ʼ��ÿ��Activity�ж���Ҫ���ӣ�����м̳еĸ�Activity���Ѿ������˸õ��ã���ô��Activity����ز������ӣ�
-		 * ������StatService.onPageStartһ��onPageEnd��������ʹ��
+		 * 页面起始（每个Activity中都需要添加，如果有继承的父Activity中已经添加了该调用，那么子Activity中务必不能添加）
+		 * 不能与StatService.onPageStart一级onPageEnd函数交叉使用
 		 */
 		StatService.onResume(this);
 		soundPlayer.startMusic();
@@ -55,10 +53,12 @@ public class FeiJi_Menu extends FeiJi_BaseAc implements OnClickListener{
 		super.onPause();
 
 		/**
-		 * ҳ�������ÿ��Activity�ж���Ҫ���ӣ�����м̳еĸ�Activity���Ѿ������˸õ��ã���ô��Activity����ز������ӣ�
-		 * ������StatService.onPageStartһ��onPageEnd��������ʹ��
+		 * 页面结束（每个Activity中都需要添加，如果有继承的父Activity中已经添加了该调用，那么子Activity中务必不能添加）
+		 * 不能与StatService.onPageStart一级onPageEnd函数交叉使用
 		 */
 		StatService.onPause(this);
+		soundPlayer.pauseMusic();
+
 	}
 
 	@Override
@@ -77,6 +77,7 @@ public class FeiJi_Menu extends FeiJi_BaseAc implements OnClickListener{
 		case R.id.feiji_bu_exit:
 			finish();
 			break;
+
 		case R.id.feiji_guanka_btn:
 			Intent intentGk = new Intent(FeiJi_Menu.this, FeiJi_Main.class);
 			intentGk.putExtra("isgk", true);

@@ -16,7 +16,8 @@
         android:gravity="center"
         android:text="@string/FeiJiScore"
         android:textColor="@color/black"
-        android:textSize="35sp" />
+        android:textSize="35sp"
+        />
 
     <TextView
         android:layout_width="match_parent"

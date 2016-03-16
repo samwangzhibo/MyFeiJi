@@ -1,9 +1,21 @@
 package com.k.feiji;
+import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
+import android.app.Dialog;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
+import android.os.Build;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.Window;
+import android.widget.Button;
+import android.widget.TextView;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.concurrent.CopyOnWriteArrayList;
+import com.k.feiji.util.SoundPlayer;
 
 import org.cocos2d.actions.base.CCFiniteTimeAction;
 import org.cocos2d.actions.instant.CCCallFuncN;
@@ -24,39 +36,30 @@ import org.cocos2d.types.CGSize;
 import org.cocos2d.types.ccColor3B;
 import org.cocos2d.types.ccColor4B;
 
-import com.k.feiji.util.SoundPlayer;
-
-import android.annotation.SuppressLint;
-import android.app.Dialog;
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.MotionEvent;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.Window;
-import android.widget.Button;
-import android.widget.TextView;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @SuppressLint("NewApi")
 public class FeiJi_Play extends CCColorLayer {
 
 	private static final String TAG = FeiJi_Play.class.getSimpleName();
-	private List<FeiJi_Sprite> _Foes = new CopyOnWriteArrayList<FeiJi_Sprite>();
-	private List<FeiJi_Sprite> _BigFoes = new CopyOnWriteArrayList<FeiJi_Sprite>();
+	private List<FeiJi_Sprite> _Foes = new CopyOnWriteArrayList<FeiJi_Sprite>(); //ä¸­å°é£æœº
+	private List<FeiJi_Sprite> _BigFoes = new CopyOnWriteArrayList<FeiJi_Sprite>(); //å¤§é£æœº
 	private List<CCSprite> _Shots = new CopyOnWriteArrayList<CCSprite>();
 	private List<CCSprite> _Red_Bombs = new CopyOnWriteArrayList<CCSprite>();
-	private List<FeiJi_Sprite> _AllFoes = new CopyOnWriteArrayList<FeiJi_Sprite>();
+	private List<FeiJi_Sprite> _AllFoes = new CopyOnWriteArrayList<FeiJi_Sprite>(); //å…¨éƒ¨é£æœº
+	//æ–‡æœ¬æ¡†
 	private CCLabel _ScoreLabel;
 	private CCLabel _TargetScoreLabel;
 	private CCLabel _Red_Bomb_Num;
+	//ç²¾çµ
 	private CCSprite _Red_Bomb;
 	private CCSprite _FeiJi_Play;
 	private CCSprite _FeiJi_Pause;
 	private CGPoint _Touch_Location;
+
 	private String _Font_Path = "Cookies.ttf";
 	private String _FeiJi_Back_Path = "images/feiji_background.png";
 	private String _MiddleFoe_Path_2 = "images/middlefoe_2.png";
@@ -73,38 +76,62 @@ public class FeiJi_Play extends CCColorLayer {
 	private String _Red_Bomb_Path = "images/red_bomb.png";
 	private String _Blue_Shot_Down_Path = "images/blue_shot_down.png";
 	private String _Blue_Shot = "images/blue_shot.png";
-	SoundPlayer soundPlayer;
-	private int _Get_Score = 0;// »ñµÃµÄ·ÖÊı
-	private int _Target_Score = 40000;// Ä¿±êµÄ·ÖÊı
-	private int _Level = 1;//¹Ø¿¨Êı
-	private float _Shot_Du = 0.5f;// ×Óµ¯ËÙ¶È
-	private boolean _Can_Move = false;// ÊÇ·ñÔÚ¶ÔÏóÉÏÒÆ¶¯
+	private int _Get_Score = 0;// è·å¾—çš„åˆ†æ•°
+	/**
+	 * ç›®æ ‡çš„åˆ†æ•°ï¼ˆå…³å¡æ¨¡å¼æœ‰æ•ˆï¼‰
+	 */
+	private int _Target_Score = 40000;
+	private int _Level = 1;//å…³å¡æ•°
+	/**
+	 * å­å¼¹é€Ÿåº¦ï¼ˆå¯è°ƒæ§ï¼‰
+	 */
+	private float _Shot_Du = 0.5f;
+	/**
+	 * æ ¹æ®æ‰‹æŒ‡ä½ç½®åˆ¤æ–­é£æœºæ˜¯å¦å¯ä»¥ç§»åŠ¨
+	 */
+	private boolean _Can_Move = false;
 	private CGSize _WinSize;
-	private int _Play_Image_Chage = 1;// ·É»úÍ¼Æ¬ÅĞ¶Ï
-	private int _BigFoe_Image_Chage = 1;// ´óĞÍµĞ»úÍ¼Æ¬ÅĞ¶Ï
-	private String _SmallFoe_Sequence_Path = "images/smallfoe_seq.png";
-	private String _MiddleFoe_Sequence_Path = "images/middlefoe_seq.png";
-	private String _BigFoe_Sequence_Path = "images/bigfoe_seq.png";
-	private String _Play_Sequence_Path = "images/play_seq.png";
-	private int _Big_Life = 16, _Middle_Life = 8, _Small_life = 2;// µĞ»úÉúÃü
-	private int _ChangeImage_Delay = -1;// Í¼Æ¬¸Ä±äÑÓÊ±
-	private int _Pause_OR = -1;// ÔİÍ£µã»÷ÅĞ¶Ï
-	private int Red_Bomb_Num = 0;// ºìÕ¨µ¯ÊıÁ¿
-	private boolean Blue_Shot_Change = false;// ÊÇ·ñÀ¶×Óµ¯
-	private long Blue_Shot_Last_Time = 0;// À¶×Óµ¯³ÖĞøÊ±¼ä
-	private int Blue_Red_Down_Time = 30;// À¶×Óµ¯ºÍºìÕ¨µ¯µÄËæ»úÊı
-	private int FoeDown_Time = 8;// µĞ»úµÄÏÂÂäËÙ¶È
+	private int _Play_Image_Chage = 1;// é£æœºå›¾ç‰‡åˆ¤æ–­
+	private int _BigFoe_Image_Chage = 1;// å¤§å‹é£æœºå›¾ç‰‡åˆ¤æ–­
+
+	private int _Big_Life = 16, _Middle_Life = 8, _Small_life = 2;// æ•Œæœºç”Ÿå‘½
+	private int _ChangeImage_Delay = -1;//å›¾ç‰‡æ”¹å˜å»¶æ—¶
+	private int _Pause_OR = -1;// æš‚åœç‚¹å‡»åˆ¤æ–­
+	private int Red_Bomb_Num = 0;//çº¢ç‚¸å¼¹æ•°
+	/**
+	 * æ˜¯å¦è“å­å¼¹
+	 */
+	private boolean Blue_Shot_Change = false;
+	private long Blue_Shot_Last_Time = 0;//è“å­å¼¹æŒç»­æ—¶é—´
+	private int Blue_Red_Down_Time = 30;//è“å­å¼¹å’Œçº¢å­å¼¹çš„éšæœºæ•°
+	private int FoeDown_Time = 8;//æ•Œæœºä¸‹è½é€Ÿåº¦
 	private SharedPreferences _Share;
 	private String ScoreList = "0;0;0;0;0;0;0;0;0;0";
 	private Dialog _Dialog;
 	private boolean _Invincible = false;
+	/**
+	 * æ˜¯å¦æ˜¯å…³å¡æ¨¡å¼
+	 */
 	private boolean _IsGK = false;
-	private Feiji_Guanka feiji_Guanka;
+	private Feiji_Guanka feiji_Guanka;//å…³å¡ç®¡ç†ç±»
+	/**
+	 * æ˜¯å¦æ˜¯è‡ªå·±ç‚¹å‡»çš„æš‚åœï¼Œé˜²æ­¢resumeådialogè¿˜åœ¨ï¼ŒèƒŒæ™¯å´åœ¨æ’­æ”¾çš„æƒ…å†µ
+	 */
+	private static boolean isClickPause = false;
+	//é£æœºçˆ†ç‚¸åºåˆ—
+	private String _SmallFoe_Sequence_Path = "images/smallfoe_seq.png";
+	private String _MiddleFoe_Sequence_Path = "images/middlefoe_seq.png";
+	private String _BigFoe_Sequence_Path = "images/bigfoe_seq.png";
+	private String _Play_Sequence_Path = "images/play_seq.png";
+	private SoundPlayer soundPlayer;
+
+	public static boolean getIsClickPause(){
+		return isClickPause;
+	}
 
 	protected FeiJi_Play(ccColor4B color) {
 		super(color);
-		// TODO Auto-generated constructor stub
-		
+
 		Init();
 	}
 
@@ -115,38 +142,39 @@ public class FeiJi_Play extends CCColorLayer {
 		
 	}
 	private void Init() {
-		// TODO Auto-generated method stub
 		_Share = CCDirector.sharedDirector().getActivity()
 				.getSharedPreferences("Share", Context.MODE_PRIVATE);
-		_WinSize = CCDirector.sharedDirector().displaySize();// »ñÈ¡ÆÁÄ»´óĞ¡
+		_WinSize = CCDirector.sharedDirector().displaySize();//è·å–å±å¹•å¤§å°
 		setIsTouchEnabled(true);
 
 		CCSprite _FeiJi_Back = CCSprite.sprite(_FeiJi_Back_Path);
-		// ±³¾°°´ÆÁÄ»±ÈÀı·Å´ó
+		//èƒŒæ™¯æŒ‰å±å¹•æ¯”ä¾‹æ”¾å¤§
 		_FeiJi_Back.setScaleX(_WinSize.width
 				/ _FeiJi_Back.getTexture().getWidth());
 		_FeiJi_Back.setScaleY(_WinSize.height
 				/ _FeiJi_Back.getTexture().getHeight());
 		_FeiJi_Back.setPosition(CGPoint.make(_WinSize.width / 2,
-				_WinSize.height / 2));// Ä¬ÈÏÖĞĞÄµãÎª×óÏÂ½Ç£¬½«±³¾°ÖĞĞÄµãÒÆµ½ÆÁÄ»ÖĞ¼ä
-		addChild(_FeiJi_Back);// ½«±³¾°Ìí¼Óµ½³¡¾°
+				_WinSize.height / 2));// é»˜è®¤ä¸­å¿ƒç‚¹ä¸ºå·¦ä¸‹è§’
+		addChild(_FeiJi_Back);// æ·»åŠ èƒŒæ™¯åˆ°åœºæ™¯
 
 		_FeiJi_Pause = CCSprite.sprite(_Pause_Path);
 		_FeiJi_Pause.setPosition(CGPoint.make(
 				_FeiJi_Pause.getContentSize().width / 2 + 1, _WinSize.height
 						- _FeiJi_Pause.getContentSize().height / 2 - 1));
-		addChild(_FeiJi_Pause);// Ìí¼ÓÔİÍ£
-		
-		feiji_Guanka = Feiji_Guanka.getInstance();
-		AddScore();
+		Log.e(TAG, "x : " + _FeiJi_Pause.getContentSize().width / 2 + 1 + " y: " + (_WinSize.height
+				- _FeiJi_Pause.getContentSize().height / 2 - 1));
+		addChild(_FeiJi_Pause);// æ·»åŠ æš‚åœ
 
-		this.schedule("GameFoes", 0.5f);// Ò»ÃëÖ´ĞĞÒ»´Î
+		feiji_Guanka = Feiji_Guanka.getInstance();
+		AddScore(); //ç¬¬ä¸€æ¬¡é»˜è®¤åŠ è½½åˆ†æ•°
+
+		//this.schedule("GameFoes", 0.5f);// 0.5ç§’æ‰§è¡Œä¸€æ¬¡ æ·»åŠ æ•Œæœº
 		this.schedule("GameShot", 0.2f);
-		GamePlay();
-		this.schedule("AddPlay", 0.2f);
-		this.schedule("Detection", 0f);
-		this.schedule("AddRedBlueDown", 2.0f);
-		this.schedule("AddBigFoe", 0.2f);
+		GamePlay();//æ·»åŠ é£æœº
+		//this.schedule("AddPlay", 0.2f);
+		//this.schedule("Detection", 0f);
+		//this.schedule("AddRedBlueDown", 2.0f);
+		//this.schedule("AddBigFoe", 0.2f);
 		
 		AddRedBomb();
 		
@@ -171,7 +199,7 @@ public class FeiJi_Play extends CCColorLayer {
 	}
 
 	/**
-	 * Ìí¼ÓºìÉ«Õ¨µ¯À¶É«×Óµ¯ÂäÏÂ
+	 * ï¿½ï¿½Óºï¿½É«Õ¨ï¿½ï¿½ï¿½ï¿½É«ï¿½Óµï¿½ï¿½ï¿½ï¿½ï¿½
 	 */
 	public void AddRedBlueDown(float t) {
 		// TODO Auto-generated method stub
@@ -203,7 +231,7 @@ public class FeiJi_Play extends CCColorLayer {
 		addChild(_Red_Blue_Down);
 		_Red_Bombs.add(_Red_Blue_Down);
 		CCFiniteTimeAction fs_timeAction = CCMoveTo.action(1,
-				CGPoint.ccp(actualX, _WinSize.height / 3 * 2));// Ê±¼äÄÚÒÆ¶¯
+				CGPoint.ccp(actualX, _WinSize.height / 3 * 2));// Ê±ï¿½ï¿½ï¿½ï¿½ï¿½Æ¶ï¿½
 
 		CCCallFuncN fs_back = CCCallFuncN.action(this, "Red_Bomb_Back");
 		CCSequence fs_actions = CCSequence.actions(fs_timeAction, fs_back);
@@ -212,10 +240,9 @@ public class FeiJi_Play extends CCColorLayer {
 	}
 
 	/**
-	 * Ìí¼ÓºìÉ«Õ¨µ¯
+	 * æ·»åŠ çº¢è‰²ç‚¸å¼¹ï¼Œç‚¸å¼¹æ•°>0 æ‰æ¸²æŸ“
 	 */
 	private void AddRedBomb() {
-		// TODO Auto-generated method stub
 		if (_Red_Bomb_Num != null)
 			_Red_Bomb_Num.removeSelf();
 		if (_Red_Bomb != null)
@@ -234,13 +261,13 @@ public class FeiJi_Play extends CCColorLayer {
 					_Red_Bomb.getContentSize().width + 5
 							+ _Red_Bomb_Num.getContentSize().width / 2,
 					_Red_Bomb.getContentSize().height / 2));
-			addChild(_Red_Bomb_Num);// ½«·ÖÊıÌí¼Óµ½³¡¾°
+			addChild(_Red_Bomb_Num);// æ·»åŠ ç‚¸å¼¹æ•°
 		}
 
 	}
 
 	/**
-	 * Ìí¼ÓºìÉ«Õ¨µ¯ÂäÏÂ·µ»Ø
+	 * ï¿½ï¿½Óºï¿½É«Õ¨ï¿½ï¿½ï¿½ï¿½ï¿½Â·ï¿½ï¿½ï¿½
 	 */
 	public void Red_Bomb_Back(Object sender) {
 		CCSprite Red_Bomb = (CCSprite) sender;
@@ -248,14 +275,14 @@ public class FeiJi_Play extends CCColorLayer {
 		CCFiniteTimeAction fs_timeAction = CCMoveTo.action(
 				0.5f,
 				CGPoint.ccp(Red_Bomb.getPosition().x, _WinSize.height / 3 * 2
-						+ _WinSize.height / 6));// Ê±¼äÄÚÒÆ¶¯
+						+ _WinSize.height / 6));// Ê±ï¿½ï¿½ï¿½ï¿½ï¿½Æ¶ï¿½
 		CCCallFuncN fs_back = CCCallFuncN.action(this, "Red_Bomb_Back2");
 		CCSequence fs_actions = CCSequence.actions(fs_timeAction, fs_back);
 		Red_Bomb.runAction(fs_actions);
 	}
 
 	/**
-	 * Ìí¼ÓºìÉ«Õ¨µ¯ÂäÏÂ·µ»ØºóÏÂ½µ
+	 * ï¿½ï¿½Óºï¿½É«Õ¨ï¿½ï¿½ï¿½ï¿½ï¿½Â·ï¿½ï¿½Øºï¿½ï¿½Â½ï¿½
 	 */
 	public void Red_Bomb_Back2(Object sender) {
 		CCSprite Red_Bomb = (CCSprite) sender;
@@ -264,26 +291,26 @@ public class FeiJi_Play extends CCColorLayer {
 		CCFiniteTimeAction fs_timeAction = CCMoveTo.action(
 				1.0f,
 				CGPoint.ccp(Red_Bomb.getPosition().x,
-						-(Red_Bomb.getContentSize().height / 2)));// Ê±¼äÄÚÒÆ¶¯
+						-(Red_Bomb.getContentSize().height / 2)));// Ê±ï¿½ï¿½ï¿½ï¿½ï¿½Æ¶ï¿½
 		CCCallFuncN fs_Over = CCCallFuncN.action(this, "Red_Bomb_Over");
 		CCSequence fs_actions = CCSequence.actions(fs_timeAction, fs_Over);
 		Red_Bomb.runAction(fs_actions);
 	}
 
 	/**
-	 * Ìí¼ÓµĞ»ú
+	 * æ·»åŠ æ•Œæœºï¼Œå¹¶ä¸‹è½ é»˜è®¤30ä¸­ 1çš„æ¦‚ç‡æ‰“é£æœº 2çš„æ¦‚ç‡ä¸­é£æœº
 	 */
 	private void AddFoes() {
 
 		Random rand = new Random();
-		int randomValue = rand.nextInt(30);
+		int randomValue = rand.nextInt(10);
 		FeiJi_Sprite _FeiJi_Foe = new FeiJi_Sprite();
 		_FeiJi_Foe.setClicked_Or(false);
 		if (randomValue == 0 && _BigFoes.size() < 1) {
 			_FeiJi_Foe.setLift(_Big_Life);
 			_FeiJi_Foe.setMax_Life(_Big_Life);
 			_FeiJi_Foe.setCCSprite(_BigFoe_Path);
-			FoeDown(_FeiJi_Foe, 0);
+			FoeDown(_FeiJi_Foe, 0);//æ•Œæœºä¸‹è½
 		} else if (randomValue == 1 || randomValue == 2) {
 			_FeiJi_Foe.setLift(_Middle_Life);
 			_FeiJi_Foe.setMax_Life(_Middle_Life);
@@ -300,7 +327,7 @@ public class FeiJi_Play extends CCColorLayer {
 	}
 
 	/**
-	 * ¸Ä±äÍæ¼Ò¿ØÖÆ·É»úÍ¼Æ¬
+	 * ï¿½Ä±ï¿½ï¿½ï¿½Ò¿ï¿½ï¿½Æ·É»ï¿½Í¼Æ¬
 	 */
 	public void AddPlay(float t) {
 		_Play_Image_Chage = -_Play_Image_Chage;
@@ -322,7 +349,7 @@ public class FeiJi_Play extends CCColorLayer {
 	}
 
 	/**
-	 * Ìí¼ÓÍæ¼Ò¿ØÖÆ·É»ú
+	 * æ·»åŠ ä¸»é£æœº
 	 */
 	private void AddPlay() {
 		_FeiJi_Play = CCSprite.sprite(_Play_Path);
@@ -332,7 +359,7 @@ public class FeiJi_Play extends CCColorLayer {
 	}
 
 	/**
-	 * ¸Ä±ä´óĞÍµĞ»úÍ¼Æ¬
+	 * ï¿½Ä±ï¿½ï¿½ï¿½ÍµĞ»ï¿½Í¼Æ¬
 	 */
 	public void AddBigFoe(float t) {
 		if (_BigFoes.size() > 0) {
@@ -349,7 +376,7 @@ public class FeiJi_Play extends CCColorLayer {
 	}
 
 	/**
-	 * Ìí¼Ó·É»ú×Óµ¯
+	 * æ·»åŠ é£æœºå­å¼¹
 	 */
 	private void AddShot() {
 		soundPlayer.biu();
@@ -383,19 +410,19 @@ public class FeiJi_Play extends CCColorLayer {
 
 		_Shots.add(_FeiJi_Shot);
 
-		// ÔÚÊ±¼äÄÚÒÆ¶¯µ½Ä¿µÄµØ
+		// ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½Æ¶ï¿½ï¿½ï¿½Ä¿ï¿½Äµï¿½
 		CCFiniteTimeAction fs_timeAction = CCMoveBy.action(_Shot_Du, CGPoint
 				.ccp(localX - localX, _FeiJi_Shot.getContentSize().height / 2
-						+ _WinSize.height));// CCMoveByÊÇÏòÁ¿£¬Ïàµ±ÓÚ´Óµ±Ç°µã¿ªÊ¼¼ÓÉÏÄãµÄµãµÄ´óĞ¡¾ÍÊÇÒÆ¶¯¹ıºóµÄÎ»ÖÃ
+						+ _WinSize.height));// CCMoveByï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½àµ±ï¿½Ú´Óµï¿½Ç°ï¿½ã¿ªÊ¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Äµï¿½Ä´ï¿½Ğ¡ï¿½ï¿½ï¿½ï¿½ï¿½Æ¶ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½
 		CCCallFuncN fs_Over = null;
 		fs_Over = CCCallFuncN.action(this, "Shot_Over");
 
-		CCSequence fs_actions = CCSequence.actions(fs_timeAction, fs_Over);// Ñ­»·ÔËĞĞ
+		CCSequence fs_actions = CCSequence.actions(fs_timeAction, fs_Over);// Ñ­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		_FeiJi_Shot.runAction(fs_actions);
 	}
 
 	/**
-	 * Ìí¼ÓµĞ»úÂäÏÂ
+	 * æ·»åŠ æ•Œæœº,å¹¶è½ä¸‹
 	 */
 	private void FoeDown(FeiJi_Sprite _FeiJi_Foe2, int i) {
 		Random rand = new Random();
@@ -403,7 +430,8 @@ public class FeiJi_Play extends CCColorLayer {
 		int maxX = (int) (_WinSize.width - _FeiJi_Foe2.getCCSprite()
 				.getContentSize().width / 2.0f);
 		int rangeX = maxX - minX;
-		int actualX = rand.nextInt(rangeX) + minX;
+		int actualX = rand.nextInt(rangeX) + minX; //å®é™…xä½ç½®
+
 		int minDuration = FoeDown_Time - 4;
 		int maxDuration = FoeDown_Time;
 		if (_Get_Score > 1000000) {
@@ -411,7 +439,8 @@ public class FeiJi_Play extends CCColorLayer {
 			minDuration = FoeDown_Time - 5;
 		}
 		int rangeDuration = maxDuration - minDuration;
-		int actualDuration = rand.nextInt(rangeDuration) + minDuration;
+		int actualDuration = rand.nextInt(rangeDuration) + minDuration;//çœŸå®é€Ÿåº¦
+
 		if (actualDuration < 0) {
 			actualDuration = rand.nextInt(2) + 2;
 		}
@@ -419,7 +448,7 @@ public class FeiJi_Play extends CCColorLayer {
 		_FeiJi_Foe2.setInitX(actualX);
 		_FeiJi_Foe2.setInitDuration(actualDuration);
 		_FeiJi_Foe2.setInitY(_FeiJi_Foe2.getCCSprite().getContentSize().height
-				/ 2.0f + _WinSize.height);
+				/ 2.0f + _WinSize.height); //é£æœºå¤´éƒ¨åˆšåˆšåœ¨å¤–é¢
 
 		_FeiJi_Foe2.getCCSprite().setPosition(
 				actualX,
@@ -432,28 +461,28 @@ public class FeiJi_Play extends CCColorLayer {
 			_BigFoes.add(_FeiJi_Foe2);
 		} else {
 			if (i == 1) {
-				_FeiJi_Foe2.getCCSprite().setTag(1);
+				_FeiJi_Foe2.getCCSprite().setTag(1); //ä¸­é£æœº
 			} else {
-				_FeiJi_Foe2.getCCSprite().setTag(2);
+				_FeiJi_Foe2.getCCSprite().setTag(2); //å°é£æœº
 			}
 			_Foes.add(_FeiJi_Foe2);
 		}
 
 		CCFiniteTimeAction fs_timeAction = CCMoveTo.action(actualDuration,
-				CGPoint.ccp(actualX, -(_FeiJi_Foe2.getCCSprite()
-						.getContentSize().height / 2)));// Ê±¼äÄÚÒÆ¶¯
-		CCCallFuncN fs_Over = null;
+				CGPoint.ccp(0, -(_FeiJi_Foe2.getCCSprite()
+						.getContentSize().height / 2)));//å®è·µå†…ç§»åŠ¨ï¼Œæ³¨æ„ä¸æ˜¯moveBy
+		CCCallFuncN fs_Over = null; //åŠ¨ç”»å¯¹è±¡
 		if (i == 0)
 			fs_Over = CCCallFuncN.action(this, "BigFoe_Over");
 		else
 			fs_Over = CCCallFuncN.action(this, "Foe_Over");
 
-		CCSequence fs_actions = CCSequence.actions(fs_timeAction, fs_Over);
+		CCSequence fs_actions = CCSequence.actions(fs_timeAction, fs_Over);//æ‰§è¡Œå®ŒåŠ¨ç”»ï¼Œæ‰§è¡Œ"BigFoe_Over"æ–¹æ³•
 		_FeiJi_Foe2.getCCSprite().runAction(fs_actions);
 	}
 
 	/**
-	 * ¸øÓèÊ±¼äºÍÎ»ÖÃ£¬Ìí¼ÓµĞ»úÂäÏÂ
+	 * ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½Î»ï¿½Ã£ï¿½ï¿½ï¿½ÓµĞ»ï¿½ï¿½ï¿½ï¿½ï¿½
 	 */
 	private void Down(FeiJi_Sprite _FeiJi_Foe, int i, float y) {
 
@@ -474,7 +503,7 @@ public class FeiJi_Play extends CCColorLayer {
 
 		CCFiniteTimeAction fs_timeAction = CCMoveTo.action(_FeiJi_Foe
 				.getInitDuration(), CGPoint.ccp(_FeiJi_Foe.getInitX(),
-				-(_FeiJi_Foe.getCCSprite().getContentSize().height / 2)));// Ê±¼äÄÚÒÆ¶¯
+				-(_FeiJi_Foe.getCCSprite().getContentSize().height / 2)));// Ê±ï¿½ï¿½ï¿½ï¿½ï¿½Æ¶ï¿½
 		CCCallFuncN fs_Over = null;
 		if (i == 0)
 			fs_Over = CCCallFuncN.action(this, "BigFoe_Over");
@@ -486,23 +515,23 @@ public class FeiJi_Play extends CCColorLayer {
 	}
 
 	/**
-	 * Ìí¼Ó½áÊøÇå³ıµĞ»ú
+	 * æ·»åŠ åŠ¨ç”»ç»“æŸï¼Œæ¸…é™¤å°ä¸­æ•Œæœº
 	 */
 	public void Foe_Over(Object sender) {
 		CCSprite foe_over = (CCSprite) sender;
-		foe_over.removeSelf();
+		foe_over.removeSelf(); //ç§»é™¤èŠ‚ç‚¹
 
 		for (int i = 0; i < _Foes.size(); i++) {
 			FeiJi_Sprite foe = _Foes.get(i);
 			if (foe.getCCSprite() == foe_over) {
-				_Foes.remove(i);
+				_Foes.remove(i); //æ•°ç»„ç§»é™¤
 				break;
 			}
 		}
 	}
 
 	/**
-	 * Ìí¼Ó½áÊøÇå³ıµĞ»ú
+	 * æ·»åŠ åŠ¨ç”»ç»“æŸæ¸…é™¤æ•Œæœº
 	 */
 	public void BigFoe_Over(Object sender) {
 		CCSprite bigfoe_over = (CCSprite) sender;
@@ -515,11 +544,10 @@ public class FeiJi_Play extends CCColorLayer {
 				break;
 			}
 		}
-
 	}
 
 	/**
-	 * Ìí¼Ó½áÊøÇå³ı×Óµ¯
+	 * ï¿½ï¿½Ó½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Óµï¿½
 	 */
 	public void Shot_Over(Object sender) {
 		CCSprite shot_over = (CCSprite) sender;
@@ -528,7 +556,7 @@ public class FeiJi_Play extends CCColorLayer {
 	}
 
 	/**
-	 * Ìí¼Ó½áÊøÇå³ıºìÉ«Õ¨µ¯
+	 * ï¿½ï¿½Ó½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É«Õ¨ï¿½ï¿½
 	 */
 	public void Red_Bomb_Over(Object sender) {
 		CCSprite bomb_over = (CCSprite) sender;
@@ -540,13 +568,13 @@ public class FeiJi_Play extends CCColorLayer {
 	public boolean ccTouchesBegan(MotionEvent event) {
 		// TODO Auto-generated method stub
 		CGPoint Location = CCDirector.sharedDirector().convertToGL(
-				CGPoint.ccp(event.getX(), event.getY()));// »ñÈ¡µã»÷Î»ÖÃ
+				CGPoint.ccp(event.getX(), event.getY()));// ï¿½ï¿½È¡ï¿½ï¿½ï¿½Î»ï¿½ï¿½
 		CGRect Rect = _FeiJi_Play.getBoundingBox();
 		CGRect Rect2 = _FeiJi_Pause.getBoundingBox();
 		CGRect Rect3 = null;
 		if (_Red_Bomb != null)
 			Rect3 = _Red_Bomb.getBoundingBox();
-		if (CGRect.containsPoint(Rect, Location) && _Pause_OR != 1) {// ÅĞ¶ÏÊÇ·ñµã»÷µ½¿ØÖÆ·É»ú
+		if (CGRect.containsPoint(Rect, Location) && _Pause_OR != 1) {// ï¿½Ğ¶ï¿½ï¿½Ç·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ·É»ï¿½
 			_Can_Move = true;
 		} else {
 			_Can_Move = false;
@@ -592,7 +620,7 @@ public class FeiJi_Play extends CCColorLayer {
 	}
 
 	/**
-	 * ¿ØÖÆ·É»úµÄÅö×²
+	 * æ§åˆ¶é£æœºçš„ç¢°æ’
 	 */
 	private void PlayOver() {
 		CGRect Rect = _FeiJi_Play.getBoundingBox();
@@ -634,7 +662,7 @@ public class FeiJi_Play extends CCColorLayer {
 	}
 
 	/**
-	 * Í£Ö¹³ÖĞøµÄ·½·¨
+	 *  åœæ­¢æŒç»­çš„æ–¹æ³•
 	 */
 	private void StopSchedule() {
 		this.unschedule("GameFoes");
@@ -644,9 +672,10 @@ public class FeiJi_Play extends CCColorLayer {
 		this.unschedule("AddRedBlueDown");
 	}
 
+
 	/**
-	 * Åö×²¼àÌı
-	 * 
+	 * ç¢°æ’ç›‘å¬
+	 *
 	 * @param t
 	 */
 	public void Detection(float t) {
@@ -657,7 +686,7 @@ public class FeiJi_Play extends CCColorLayer {
 			for (int j = 0; j < _BigFoes.size(); j++) {
 				FeiJi_Sprite BigFoe = (FeiJi_Sprite) _BigFoes.get(j);
 				CGRect Rect2 = BigFoe.getCCSprite().getBoundingBox();
-				if (CGRect.intersects(Rect2, Rect)) {// ÅĞ¶ÏÅö×²
+				if (CGRect.intersects(Rect2, Rect)) {// ï¿½Ğ¶ï¿½ï¿½ï¿½×²
 					_ChangeImage_Delay = 0;
 					if (Shot.getTag() == 1)
 						BigFoe.Life -= 2;
@@ -665,7 +694,7 @@ public class FeiJi_Play extends CCColorLayer {
 						BigFoe.Life--;
 					_Shots.remove(Shot);
 					Shot.removeSelf();
-					if (BigFoe.Life <= 0) {// ÉúÃü½áÊø ·É»úÏûÊ§
+					if (BigFoe.Life <= 0) {// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½É»ï¿½ï¿½ï¿½Ê§
 						BigFoe.getCCSprite().removeSelf();
 						_BigFoes.remove(j);
 						ChageScore(30000);
@@ -755,7 +784,7 @@ public class FeiJi_Play extends CCColorLayer {
 	}
 
 	/**
-	 * Çå³ıµ±Ç°ËùÓĞµĞ»ú
+	 * ï¿½ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ĞµĞ»ï¿½
 	 */
 	private void ReMoveAll() {
 		List<FeiJi_Sprite> _FoesAll = _Foes;
@@ -791,65 +820,67 @@ public class FeiJi_Play extends CCColorLayer {
 	}
 
 	/**
-	 * ·ÖÊı¸Ä±ä
+	 * ï¿½ï¿½ï¿½ï¿½Ä±ï¿½
 	 * 
 	 * @param score
 	 */
 	private void ChageScore(int score) {
 		_Get_Score += score;
 		if(_IsGK){
-			//µ±Ç°·ÖÊıÊÇ·ñ´óÓÚÄ¿±ê·Ö
+			//ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½
 			_Level = feiji_Guanka.getLevel(_Get_Score);
 			if(_Get_Score > _Target_Score){
-				Log.e(TAG,"Éı¼¶Îª---"+_Level);
+				Log.e(TAG,"ï¿½ï¿½Îª---"+_Level);
 				_Target_Score = feiji_Guanka.getTargetScore(_Get_Score);
-				//ÏÔÊ¾ÏÂÒ»¹Ødialog
-				
+				//ï¿½ï¿½Ê¾ï¿½ï¿½Ò»ï¿½ï¿½dialog
+				showGKDialog();
 			}
 		}
-		
 		AddScore();
-
 	}
 
 	/**
-	 * Ìí¼Ó·ÖÊı
+	 * æ·»åŠ åˆ†æ•°
 	 */
 	private void AddScore() {
-		
+
 		if (_ScoreLabel != null)
 			_ScoreLabel.removeSelf();
-		_ScoreLabel = CCLabel.makeLabel("·ÖÊı:" + _Get_Score, _Font_Path, 30);
+		_ScoreLabel = CCLabel.makeLabel("åˆ†æ•°:" + _Get_Score, _Font_Path, 30);
 		_ScoreLabel.setColor(ccColor3B.ccGREEN);
-		_ScoreLabel.setString("·ÖÊı:" + _Get_Score);
+		_ScoreLabel.setString("åˆ†æ•°:" + _Get_Score);
 		_ScoreLabel.setPosition(CGPoint.ccp(_FeiJi_Pause.getContentSize().width
 				+ 5 + _ScoreLabel.getTexture().getWidth() / 2, _WinSize.height
 				- _FeiJi_Pause.getContentSize().height / 2));
-		addChild(_ScoreLabel);// ½«·ÖÊıÌí¼Óµ½³¡¾°
-		
+		addChild(_ScoreLabel);// å°†åˆ†æ•°æ·»åŠ åˆ°åœºæ™¯
+
 		if(_IsGK){
 			if (_TargetScoreLabel != null)
 				_TargetScoreLabel.removeSelf();
-			_TargetScoreLabel = CCLabel.makeLabel("¹Ø¿¨£º"+_Level+"     Ä¿±ê·ÖÊı:" + _Target_Score, _Font_Path, 30);
+			_TargetScoreLabel = CCLabel.makeLabel("å…³å¡ï¼š"+_Level+"     ç›®æ ‡åˆ†æ•°:" + _Target_Score, _Font_Path, 30);
 			_TargetScoreLabel.setColor(ccColor3B.ccRED);
-			_TargetScoreLabel.setString("¹Ø¿¨£º"+_Level+"     Ä¿±ê·ÖÊı:" + _Target_Score);
+			_TargetScoreLabel.setString("å…³å¡ï¼š" + _Level + "     ç›®æ ‡åˆ†æ•°:" + _Target_Score);
 			_TargetScoreLabel.setPosition(CGPoint.ccp(_ScoreLabel.getContentSize().width
 					+ 50 + _TargetScoreLabel.getTexture().getWidth() / 2, _WinSize.height
-					- _FeiJi_Pause.getContentSize().height / 2));			
-			
-			addChild(_TargetScoreLabel);// ½«¹Ø¿¨Ä¿±ê·ÖÌí¼Óµ½³¡¾°
-			
-			
+					- _FeiJi_Pause.getContentSize().height / 2));
+
+			addChild(_TargetScoreLabel);// å°†å…³å¡ç›®æ ‡åˆ†æ·»åŠ åˆ°åœºæ™¯
+
 		}
 		
 		
 	}
 
 	/**
-	 * Ìí¼ÓµĞ»úÏûÊ§¶¯»­
+	 * æ·»åŠ æ•Œæœºæ¶ˆå¤±åŠ¨ç”»
+	 * @param touchRect æ•Œæœºä½ç½®
+	 * @param Path å›¾ç‰‡åºåˆ—è·¯å¾„
+	 * @param CutW å‰ªåˆ‡çš„å®½åº¦
+	 * @param CutH å‰ªåˆ‡çš„é«˜åº¦
+	 * @param Cut è£å‰ªæ•°
 	 */
 	private void AddSpriteAnimal(CGPoint touchRect, String Path, int CutW,
-			int CutH, int Cut) {
+								 int CutH, int Cut) {
 
 		CCSpriteSheet boomSheet = CCSpriteSheet.spriteSheet(Path);
 
@@ -869,7 +900,7 @@ public class FeiJi_Play extends CCColorLayer {
 						boomSheet.getTexture(),
 						CGRect.make(x * CutW, y * CutH, CutW, CutH),
 						CGPoint.ccp(0, 0));
-				boomAnimFrames.add(frame);
+				boomAnimFrames.add(frame); //åŠ è½½å¸§
 				frameCount++;
 				if (frameCount == Cut)
 					break;
@@ -882,13 +913,14 @@ public class FeiJi_Play extends CCColorLayer {
 
 		CCCallFuncN actionAnimateDone = CCCallFuncN.action(this,
 				"SpriteAnimationFinished");
-		CCSequence actions = CCSequence.actions(boomAction, actionAnimateDone);
+		CCSequence actions = CCSequence.actions(boomAction, actionAnimateDone); //å¸§åŠ¨ç”»å®Œæˆ
 
 		Sprite.runAction(actions);
 	}
 
+
 	/**
-	 * Ìí¼ÓÖ÷»úÏûÊ§¶¯»­
+	 * æ·»åŠ ä¸»æœºæ¶ˆå¤±åŠ¨ç”»
 	 */
 	private void AddPlaySpriteAnimal(CGPoint touchRect, String Path, int CutW,
 			int CutH, int Cut) {
@@ -930,7 +962,7 @@ public class FeiJi_Play extends CCColorLayer {
 	}
 
 	/**
-	 * ½áÊøµĞ»úÏûÊ§¶¯»­
+	 * ï¿½ï¿½ï¿½ï¿½Ğ»ï¿½ï¿½ï¿½Ê§ï¿½ï¿½ï¿½ï¿½
 	 */
 	public void SpriteAnimationFinished(Object sender) {
 		CCSprite SpriteFinished = (CCSprite) sender;
@@ -938,7 +970,7 @@ public class FeiJi_Play extends CCColorLayer {
 	}
 
 	/**
-	 * ½áÊøÖ÷»úÏûÊ§¶¯»­
+	 * ç»“æŸä¸»æœºæ¶ˆå¤±åŠ¨ç”»
 	 */
 	public void PlaySpriteAnimationFinished(Object sender) {
 		if (_Share != null) {
@@ -973,7 +1005,7 @@ public class FeiJi_Play extends CCColorLayer {
 	}
 
 	/**
-	 * »÷ÖĞ¸ü»»µĞ»úÍ¼Æ¬
+	 * ï¿½ï¿½ï¿½Ğ¸ï¿½Ğ»ï¿½Í¼Æ¬
 	 * 
 	 * @param Foe
 	 * @param Click
@@ -1005,20 +1037,20 @@ public class FeiJi_Play extends CCColorLayer {
 			public void run() {
 				soundPlayer.pauseMusic();
 				soundPlayer.playSound(R.raw.game_over);
-				
+
 				LayoutInflater inflater = LayoutInflater.from(CCDirector
 						.sharedDirector().getActivity());
-				View v = inflater.inflate(R.layout.feiji_dialog, null);// µÃµ½¼ÓÔØview
+				View v = inflater.inflate(R.layout.feiji_dialog, null);// ï¿½Ãµï¿½ï¿½ï¿½ï¿½ï¿½view
 				_Dialog = new Dialog(CCDirector.sharedDirector().getActivity(),
 						R.style.Dialog_Style);
 				_Dialog.setCancelable(false);
 				_Dialog.setCanceledOnTouchOutside(false);
-				_Dialog.setContentView(v);// ÉèÖÃ²¼¾Ö
+				_Dialog.setContentView(v);// ï¿½ï¿½ï¿½Ã²ï¿½ï¿½ï¿½
 				Window window = _Dialog.getWindow();
-				window.setWindowAnimations(R.style.mystyle);  //Ìí¼Ó¶¯»­
+				window.setWindowAnimations(R.style.mystyle);  //ï¿½ï¿½Ó¶ï¿½ï¿½ï¿½
 				_Dialog.show();
-				
-				
+
+
 				TextView _Score_TV = (TextView) v
 						.findViewById(R.id.feiji_dialog_score);
 				_Score_TV.setText(_Get_Score + "");
@@ -1035,8 +1067,42 @@ public class FeiJi_Play extends CCColorLayer {
 				});
 			}
 		});
-
 	}
+
+	/**
+	 * å…³å¡dialog
+	 */
+	private void showGKDialog(){
+		CCDirector.sharedDirector().getActivity().runOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+
+				LayoutInflater inflater = LayoutInflater.from(CCDirector
+						.sharedDirector().getActivity());
+				View v = inflater.inflate(R.layout.feiji_gk_dialog, null);// ï¿½Ãµï¿½ï¿½ï¿½ï¿½ï¿½view
+				_Dialog = new Dialog(CCDirector.sharedDirector().getActivity(),
+						R.style.Dialog_Style);
+				_Dialog.setCancelable(false);
+				_Dialog.setCanceledOnTouchOutside(false);
+				_Dialog.setContentView(v);
+				Window window = _Dialog.getWindow();
+				window.setWindowAnimations(R.style.GKDialogAnimStyle);
+				_Dialog.show();
+
+				TextView textView = (TextView) v
+						.findViewById(R.id.feiji_now_level);
+				textView.setText("Level: " + _Level);
+				textView.postDelayed(new Runnable() {
+					@Override
+					public void run() {
+						_Dialog.dismiss();
+					}
+				}, 1000);
+			}
+		});
+	}
+
 	private void ShowPauseDialog() {
 		CCDirector.sharedDirector().pause();
 		soundPlayer.pauseMusic();
@@ -1044,17 +1110,16 @@ public class FeiJi_Play extends CCColorLayer {
 
 			@Override
 			public void run() {
-				// TODO Auto-generated method stub
 				LayoutInflater inflater = LayoutInflater.from(CCDirector
 						.sharedDirector().getActivity());
-				View v = inflater.inflate(R.layout.feiji_pause_dialog, null);// µÃµ½ÔİÍ£µÄview
+				View v = inflater.inflate(R.layout.feiji_pause_dialog, null);// ï¿½Ãµï¿½ï¿½ï¿½Í£ï¿½ï¿½view
 				_Dialog = new Dialog(CCDirector.sharedDirector().getActivity(),
 						R.style.Dialog_Style);
 				_Dialog.setCancelable(false);
 				_Dialog.setCanceledOnTouchOutside(false);
-				_Dialog.setContentView(v);// ÉèÖÃ²¼¾Ö
+				_Dialog.setContentView(v);// ï¿½ï¿½ï¿½Ã²ï¿½ï¿½ï¿½
 				Window window = _Dialog.getWindow();
-				window.setWindowAnimations(R.style.mystyle);  //Ìí¼Ó¶¯»­
+				window.setWindowAnimations(R.style.mystyle);  //ï¿½ï¿½Ó¶ï¿½ï¿½ï¿½
 				_Dialog.show();
 				
 				Button _Pause_TV = (Button) v
@@ -1068,6 +1133,7 @@ public class FeiJi_Play extends CCColorLayer {
 						CCDirector.sharedDirector().resume();
 						_Dialog.dismiss();
 						soundPlayer.startMusic();
+						isClickPause = false;
 					}
 				});
 				
@@ -1081,19 +1147,24 @@ public class FeiJi_Play extends CCColorLayer {
 						IntentToBack();
 						_Dialog.dismiss();
 						soundPlayer.startMusic();
+						isClickPause = false;
 					}
 				});
 				Button feiji_pause_restart = (Button) v
 						.findViewById(R.id.feiji_pause_restart);
 				feiji_pause_restart.setOnClickListener(new OnClickListener() {
 
+					@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 					@Override
 					public void onClick(View v) {
 						CCDirector.sharedDirector().getActivity().recreate();
 						_Dialog.dismiss();
 						soundPlayer.startMusic();
+						isClickPause = false;
 					}
 				});
+
+				isClickPause = true;
 				
 			}
 		});
