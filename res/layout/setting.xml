@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+<LinearLayout
+    android:orientation="vertical"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="#a3a0a0"
+    android:gravity="center"
+    android:layout_centerInParent="true"
+    >
+    <TextView
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:textColor="@color/black"
+        android:textSize="23sp"
+        android:gravity="center"
+        android:text="游戏设置"
+        />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="30dp"/>
+    <Button
+        android:id="@+id/setting_music_on"
+        style="@style/Setting_Style"
+        android:text="@string/setting_music_on" />
+    <Button
+        android:id="@+id/setting_sound_on"
+        style="@style/Setting_Style"
+        android:text="@string/setting_sound_on" />
+
+    <Button
+        android:id="@+id/setting_music_style"
+        style="@style/Setting_Style"
+        android:text="@string/setting_music_style"
+        android:layout_gravity="center_horizontal" />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="30dp"/>
+    <Button
+        android:id="@+id/setting_back"
+        style="@style/Button_Style"
+        android:text="@string/Return_Menu"
+        />
+</LinearLayout>
+    </RelativeLayout>

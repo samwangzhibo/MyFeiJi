@@ -4,9 +4,10 @@
     <string name="app_name">FeiJi</string>
     <string name="hello_world">Hello world!</string>
     <string name="NewGame">无尽模式</string>
-    <string name="Scores">Scores</string>
+    <string name="Scores">排行榜</string>
     <string name="ExitGame">Exit Game</string>
-    <string name="Return">Return</string>
+    <string name="setting">设置</string>
+    <string name="Return">返回</string>
     <string name="Return_Menu">返回菜单</string>
      <string name="restart">重新开始</string>
     <string name="FeiJiScore">飞机大战分数</string>
@@ -14,7 +15,13 @@
     <string name="FeiJiScoreList">飞机大战分数排行榜</string>
     <string name="FeiJiGuanka">关卡模式</string>
     <string name="LevelUp">升级了！</string>
-    
+    <string name="abourt">关于</string>
+    <string name="setting_music_style">声音主题</string>
+    <string name="setting_music_on">游戏音乐 on</string>
+    <string name="setting_music_off">游戏音乐 off</string>
+    <string name="setting_sound_on">游戏音效 on</string>
+    <string name="setting_sound_off">游戏音效 off</string>
+
     <color name="black">#ff000000</color>
     <color name="gray">#7B797B</color>
     

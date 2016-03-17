@@ -1,12 +1,12 @@
 package com.k.feiji;
 
-import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.view.Window;
 import android.view.WindowManager;
 
-public class FeiJi_BaseAc extends Activity {
+public class FeiJi_BaseAc extends FragmentActivity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

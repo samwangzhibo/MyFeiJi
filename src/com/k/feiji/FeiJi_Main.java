@@ -25,6 +25,7 @@ public class FeiJi_Main extends FeiJi_BaseAc {
 		setContentView(_FeiJi_Surface);
 
 		soundPlayer = SoundPlayer.getInstance();
+		if (!soundPlayer.isInit())
 		soundPlayer.init(this);
 	}
 

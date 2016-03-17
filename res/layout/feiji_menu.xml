@@ -1,10 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     style="@style/BackGround"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    >
+<LinearLayout
+    android:id="@+id/menu_ll"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     android:gravity="center"
-    android:orientation="vertical" >
+    android:layout_centerInParent="true"
+    android:orientation="vertical"
+    >
 
     <ImageView
         android:layout_width="wrap_content"
@@ -28,8 +36,20 @@
         android:text="@string/Scores" />
 
     <Button
-        android:id="@+id/feiji_bu_exit"
+        android:id="@+id/feiji_bu_setting"
         style="@style/Button_Style"
-        android:text="@string/ExitGame" />
-
+        android:text="@string/setting" />
+    <Button
+        android:id="@+id/feiji_abrout"
+        style="@style/Button_Style"
+        android:text="@string/abourt"
+        />
 </LinearLayout>
+    <FrameLayout
+        android:id="@+id/frag_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        >
+    </FrameLayout>
+</RelativeLayout>

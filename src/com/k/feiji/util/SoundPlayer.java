@@ -4,7 +4,6 @@ import android.content.Context;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.SoundPool;
-import android.util.Log;
 
 import com.k.feiji.R;
 
@@ -12,7 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
  
 /**
- * ����������
+ * 声音类
  * @author wyf
  *
  */
@@ -21,33 +20,40 @@ public class SoundPlayer {
     private static MediaPlayer music;
     private static SoundPool soundPool;
      
-    private static boolean musicSt = true; //���ֿ���
-    private static boolean soundSt = true; //��Ч����
+    private static boolean musicSt = true; //音乐开关
+    private static boolean soundSt = true; //音效开关
     private static Context context;
      
-    private static final int musicId = R.raw.game_music;
-    private static Map<Integer,Integer> soundMap; //��Ч��Դid����ع�����Դid��ӳ���ϵ��
+    public static final int musicId = R.raw.game_music;
+    public static final int musicHDL = R.raw.background;
+    public static final String[] MUSICS = new String[] { "传统音", "魂斗罗音"};
+
+    private static Map<Integer,Integer> soundMap; //音乐池
     public static SoundPlayer instance;
+    private static boolean isInit = false;
     public synchronized static SoundPlayer getInstance(){
     	 if(instance == null){
     		 instance = new SoundPlayer();
     	 }
     	 return instance;
      }
-    /**
-     * ��ʼ������
-     * @param c
-     */
+
+    public boolean isInit(){
+        return isInit;
+    }
+
     public static void init(Context c)
     {
+        isInit = true;
+
         context = c;
  
-        initMusic();
+        initMusic(musicId);
          
         initSound();
     }
      
-    //��ʼ����Ч������
+    //初始化sound
     private static void initSound()
     {
         soundPool = new SoundPool(10,AudioManager.STREAM_MUSIC,100);
@@ -56,18 +62,20 @@ public class SoundPlayer {
         soundMap.put(R.raw.bullet, soundPool.load(context, R.raw.bullet, 1));
         soundMap.put(R.raw.game_over, soundPool.load(context, R.raw.game_over, 1));
         soundMap.put(R.raw.get_bomb, soundPool.load(context, R.raw.get_bomb, 1));
+        soundMap.put(R.raw.get_double_bullet, soundPool.load(context, R.raw.get_double_bullet, 1));
+        soundMap.put(R.raw.big_spaceship_flying, soundPool.load(context, R.raw.big_spaceship_flying, 1));
     }
      
-    //��ʼ�����ֲ�����
-    private static void initMusic()
+    //初始化音乐
+    private static void initMusic(int sourseId)
     {
-        music = MediaPlayer.create(context,musicId);
+        music = MediaPlayer.create(context,sourseId);
         music.setLooping(true);
     }
      
     /**
-     * ������Ч
-     * @param resId ��Ч��Դid
+     *  播放sound
+     * @param resId 资源ID
      */
     public static void playSound(int resId)
     {
@@ -80,11 +88,12 @@ public class SoundPlayer {
     }
  
     /**
-     * ��ͣ����
+     * 暂停音乐
      */
     public static void pauseMusic()
-    {   try{
-        if(music != null && music.isPlaying())
+    {
+        try{
+        if(music != null && music.isPlaying() && musicSt)
             music.pause();
         }catch (Exception e){
         e.printStackTrace();
@@ -93,26 +102,28 @@ public class SoundPlayer {
      
 
     public static void startMusic()
-    {   try {
+    {
+        try {
         if(musicSt && music != null)
             music.start();
          }catch (Exception e){
-        Log.e("SoundPlay : 100 ---- ",e.toString());
     }
 
     }
-     
 
-    public static void changeAndPlayMusic()
+    /**
+     * 改变音乐
+     */
+    public static void changeAndPlayMusic(int sourseId)
     {
         if(music != null)
             music.release();
-        initMusic();
+        initMusic(sourseId);
         startMusic();
     }
      
     /**
-     * ������ֿ���״̬
+     * 是否播放背景音
      * @return
      */
     public static boolean isMusicSt() {
@@ -120,7 +131,7 @@ public class SoundPlayer {
     }
      
     /**
-     * �������ֿ���
+     * 设置背景音开关
      * @param musicSt
      */
     public static void setMusicSt(boolean musicSt) {
@@ -131,13 +142,11 @@ public class SoundPlayer {
             music.stop();
     }
  
-    /**
-     * �����Ч����״̬
-     * @return
-     */
+
     public static boolean isSoundSt() {
         return soundSt;
     }
+
     public void releseMusic(){
     	if(musicSt && music != null)
             music.stop();
@@ -145,7 +154,7 @@ public class SoundPlayer {
     }
  
     /**
-     * ������Ч����
+     * 设置sound开关
      * @param soundSt
      */
     public static void setSoundSt(boolean soundSt) {
@@ -153,7 +162,7 @@ public class SoundPlayer {
     }
      
     /**
-     * ������biu��������
+     * biu一声
      */
     public static void biu()
     {
