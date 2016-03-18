@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -13,7 +14,9 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.baidu.mobstat.StatService;
+import com.k.feiji.fragment.AbourtFragment;
 import com.k.feiji.fragment.SettingFragment;
+import com.k.feiji.util.SharedPrefUtil;
 import com.k.feiji.util.SoundPlayer;
 
 public class FeiJi_Menu extends FeiJi_BaseAc implements OnClickListener{
@@ -21,6 +24,7 @@ public class FeiJi_Menu extends FeiJi_BaseAc implements OnClickListener{
 	private Button _FeiJi_Button_New, _FeiJi_Button_Score,
 			_FeiJi_Button_Setting,_FeiJi_Button_Guanka,_FeiJi_Button_Abourt;
 	SoundPlayer soundPlayer;
+	SharedPrefUtil sharedPrefUtil = SharedPrefUtil.getInstance();
 	/**
 	 * 容器
 	 */
@@ -50,7 +54,11 @@ public class FeiJi_Menu extends FeiJi_BaseAc implements OnClickListener{
 		
 		soundPlayer = SoundPlayer.getInstance();
 		soundPlayer.init(this);
+		soundPlayer.musicSt = sharedPrefUtil.getBoolean("music");
+		soundPlayer.soundSt = sharedPrefUtil.getBoolean("sound");
 		soundPlayer.startMusic();
+
+		sharedPrefUtil.init(getApplicationContext());
 	}
 
 	
@@ -94,37 +102,61 @@ public class FeiJi_Menu extends FeiJi_BaseAc implements OnClickListener{
 			mll.setVisibility(View.INVISIBLE);
 			if (settFragment == null) {
 				settFragment = new SettingFragment();
-				getSupportFragmentManager().beginTransaction().replace(R.id.frag_container,settFragment).commit();
 			}
-			if (settFragment.isHidden()){
-				getSupportFragmentManager().beginTransaction().show(settFragment).commit();
-			}
+			FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+			fragmentTransaction.replace(R.id.frag_container, settFragment);
+			fragmentTransaction.addToBackStack(null);
+			fragmentTransaction.commit();
+
+			/*if (settFragment.isHidden()){
+				FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+				fragmentTransaction.show(settFragment);
+				fragmentTransaction.commit();
+			}*/
 			settFragment.setMyClickListener(new SettingFragment.MyClickListener() {
 				@Override
 				public void click(View view) {
 					switch (view.getId()) {
 						case R.id.setting_back:
 							mll.setVisibility(View.VISIBLE);
-							getSupportFragmentManager().beginTransaction().hide(settFragment).commit();
+							getSupportFragmentManager().beginTransaction().remove(settFragment).commit();
 							break;
 						case R.id.setting_music_on:
 							Button v = (Button) view;
 							if (v.getText().toString().equals(getResources().getString(R.string.setting_music_on))) {
 								v.setText(getString(R.string.setting_music_off));
+								soundPlayer.setMusicSt(false);
+								sharedPrefUtil.putBoolean("music",false);
 							} else {
 								v.setText(getString(R.string.setting_music_on));
+								soundPlayer.setMusicSt(true);
+								sharedPrefUtil.putBoolean("music", true);
 							}
 							break;
 						case R.id.setting_sound_on:
 							Button v1 = (Button) view;
 							if (v1.getText().toString().equals(getResources().getString(R.string.setting_sound_on))) {
 								v1.setText(getString(R.string.setting_sound_off));
+								soundPlayer.setSoundSt(false);
+								sharedPrefUtil.putBoolean("sound", false);
 							} else {
 								v1.setText(getString(R.string.setting_sound_on));
+								soundPlayer.setSoundSt(true);
+								sharedPrefUtil.putBoolean("sound", true);
 							}
 							break;
 						case R.id.setting_music_style:
 							addChoiceDialog();
+							break;
+						case R.id.setting_bgflow_on:
+							Button v2 = (Button) view;
+							if (v2.getText().toString().equals(getResources().getString(R.string.setting_bgflow_on))) {
+								v2.setText(getString(R.string.setting_bgflow_off));
+								sharedPrefUtil.putBoolean("bgflow", false);
+							} else {
+								v2.setText(getString(R.string.setting_bgflow_off));
+								sharedPrefUtil.putBoolean("bgflow", true);
+							}
 							break;
 				}
 				}
@@ -138,10 +170,22 @@ public class FeiJi_Menu extends FeiJi_BaseAc implements OnClickListener{
 			break;
 
 		case R.id.feiji_abrout:
-
+			mll.setVisibility(View.INVISIBLE);
+			FragmentTransaction fragmentTransaction2 = getSupportFragmentManager().beginTransaction();
+			fragmentTransaction2.replace(R.id.frag_container,  new AbourtFragment());
+			fragmentTransaction2.commit();
 			break;
 	}
 }
+
+	/**
+	 * 展示菜单
+	 */
+	public void showLL(){
+		if (mll != null && mll.getVisibility() == View.INVISIBLE){
+			mll.setVisibility(View.VISIBLE);
+		}
+	}
 	private void addChoiceDialog(){
 		Dialog alertDialog = new AlertDialog.Builder(this).
 				setTitle("背景音主题")

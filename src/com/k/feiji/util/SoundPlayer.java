@@ -20,8 +20,8 @@ public class SoundPlayer {
     private static MediaPlayer music;
     private static SoundPool soundPool;
      
-    private static boolean musicSt = true; //音乐开关
-    private static boolean soundSt = true; //音效开关
+    public static boolean musicSt = true; //音乐开关
+    public static boolean soundSt = true; //音效开关
     private static Context context;
      
     public static final int musicId = R.raw.game_music;
@@ -64,6 +64,11 @@ public class SoundPlayer {
         soundMap.put(R.raw.get_bomb, soundPool.load(context, R.raw.get_bomb, 1));
         soundMap.put(R.raw.get_double_bullet, soundPool.load(context, R.raw.get_double_bullet, 1));
         soundMap.put(R.raw.big_spaceship_flying, soundPool.load(context, R.raw.big_spaceship_flying, 1));
+
+        soundMap.put(R.raw.enemy1_down, soundPool.load(context, R.raw.enemy1_down, 1));
+        soundMap.put(R.raw.enemy2_down, soundPool.load(context, R.raw.enemy2_down, 1));
+        soundMap.put(R.raw.enemy3_down, soundPool.load(context, R.raw.enemy3_down, 1));
+        soundMap.put(R.raw.use_bomb, soundPool.load(context, R.raw.use_bomb, 1));
     }
      
     //初始化音乐
@@ -136,10 +141,12 @@ public class SoundPlayer {
      */
     public static void setMusicSt(boolean musicSt) {
         SoundPlayer.musicSt = musicSt;
-        if(musicSt)
+        if(musicSt) {
+            startMusic();
             music.start();
+        }
         else
-            music.stop();
+            music.pause();
     }
  
 

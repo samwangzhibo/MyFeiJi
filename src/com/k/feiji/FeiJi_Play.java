@@ -15,6 +15,7 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.k.feiji.util.SharedPrefUtil;
 import com.k.feiji.util.SoundPlayer;
 
 import org.cocos2d.actions.base.CCFiniteTimeAction;
@@ -130,6 +131,7 @@ public class FeiJi_Play extends CCColorLayer {
 
 	private SoundPlayer soundPlayer;
 	private SharedPreferences _Share;
+	private SharedPrefUtil sharedPrefUtil = SharedPrefUtil.getInstance();
 	private String ScoreList = "0;0;0;0;0;0;0;0;0;0";
 	private Dialog _Dialog;
 	private Feiji_Guanka feiji_Guanka;//关卡管理类
@@ -150,6 +152,8 @@ public class FeiJi_Play extends CCColorLayer {
 		
 	}
 	private void Init() {
+		Is_Bg_Move = sharedPrefUtil.getBoolean("bgflow");
+
 		_Share = CCDirector.sharedDirector().getActivity()
 				.getSharedPreferences("Share", Context.MODE_PRIVATE);
 		_WinSize = CCDirector.sharedDirector().displaySize();//获取屏幕大小
@@ -337,6 +341,7 @@ public class FeiJi_Play extends CCColorLayer {
 			_FeiJi_Foe.setMax_Life(_Big_Life);
 			_FeiJi_Foe.setCCSprite(_BigFoe_Path);
 			FoeDown(_FeiJi_Foe, 0);     //敌机下落  动画
+			soundPlayer.playSound(R.raw.big_spaceship_flying);
 		} else if (randomValue == 1 || randomValue == 2 || randomValue == 3) {
 			_FeiJi_Foe.setLift(_Middle_Life);
 			_FeiJi_Foe.setMax_Life(_Middle_Life);
@@ -405,7 +410,6 @@ public class FeiJi_Play extends CCColorLayer {
 	 * 添加飞机子弹
 	 */
 	private void AddShot() {
-		soundPlayer.biu();
 		CCSprite _FeiJi_Shot = null;
 
 		if (Blue_Shot_Change) {
@@ -415,6 +419,7 @@ public class FeiJi_Play extends CCColorLayer {
 				Blue_Shot_Change = false;
 			}
 		} else {
+			soundPlayer.biu();
 			_FeiJi_Shot = CCSprite.sprite(_Shot_Path);
 			_FeiJi_Shot.setTag(0);
 		}
@@ -620,6 +625,8 @@ public class FeiJi_Play extends CCColorLayer {
 			if (_Pause_OR != 1) {
 				if (_Red_Bomb != null && CGRect.containsPoint(Rect3, Location)
 						&& Red_Bomb_Num > 0) {
+					//红色炸弹音
+					soundPlayer.playSound(R.raw.use_bomb);
 					Red_Bomb_Num--;
 					AddRedBomb(); //更新红炸弹label
 					ReMoveAll(); //移除所有飞机
@@ -670,6 +677,9 @@ public class FeiJi_Play extends CCColorLayer {
 			FeiJi_Sprite Foe = _Foes.get(j);
 			CGRect Rect2 = Foe.getCCSprite().getBoundingBox();
 			if (CGRect.intersects(Rect2, Rect3)) {
+				//游戏结束音效
+				soundPlayer.pauseMusic();
+				soundPlayer.playSound(R.raw.game_over);
 				StopSchedule();
 				if (Foe.getCCSprite().getTag() == 2) {
 					AddSpriteAnimal(Foe.getCCSprite().getPosition(),
@@ -726,6 +736,8 @@ public class FeiJi_Play extends CCColorLayer {
 						BigFoe.getCCSprite().removeSelf();
 						_BigFoes.remove(j);
 						ChageScore(30000);
+						//大飞机毁灭音效
+						soundPlayer.playSound(R.raw.enemy2_down);
 						AddSpriteAnimal(BigFoe.getCCSprite().getPosition(), //精灵消失帧动画
 								_BigFoe_Sequence_Path, 164, 245, 6);
 					} else {
@@ -758,10 +770,12 @@ public class FeiJi_Play extends CCColorLayer {
 					if (Foe.Life <= 0) {
 						if (Foe.getCCSprite().getTag() == 2) {
 							ChageScore(1000);
+							soundPlayer.playSound(R.raw.enemy1_down);
 							AddSpriteAnimal(Foe.getCCSprite().getPosition(),
 									_SmallFoe_Sequence_Path, 52, 52, 3);
 						} else {
 							ChageScore(6000);
+							soundPlayer.playSound(R.raw.enemy3_down);
 							AddSpriteAnimal(Foe.getCCSprite().getPosition(),
 									_MiddleFoe_Sequence_Path, 69, 87, 4);
 						}
@@ -946,7 +960,6 @@ public class FeiJi_Play extends CCColorLayer {
 	 */
 	private void AddSpriteAnimal(CGPoint touchRect, String Path, int CutW,
 								 int CutH, int Cut) {
-
 		CCSpriteSheet boomSheet = CCSpriteSheet.spriteSheet(Path);
 
 		this.addChild(boomSheet);
@@ -1100,8 +1113,7 @@ public class FeiJi_Play extends CCColorLayer {
 
 			@Override
 			public void run() {
-				soundPlayer.pauseMusic();
-				soundPlayer.playSound(R.raw.game_over);
+
 
 				LayoutInflater inflater = LayoutInflater.from(CCDirector
 						.sharedDirector().getActivity());

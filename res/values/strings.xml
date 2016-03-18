@@ -21,6 +21,8 @@
     <string name="setting_music_off">游戏音乐 off</string>
     <string name="setting_sound_on">游戏音效 on</string>
     <string name="setting_sound_off">游戏音效 off</string>
+    <string name="setting_bgflow_on">背景移动 on</string>
+    <string name="setting_bgflow_off">背景移动 off</string>
 
     <color name="black">#ff000000</color>
     <color name="gray">#7B797B</color>
