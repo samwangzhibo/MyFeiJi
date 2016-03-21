@@ -55,6 +55,7 @@ public class FeiJi_Play extends CCColorLayer {
 	private CCLabel _ScoreLabel;
 	private CCLabel _TargetScoreLabel;
 	private CCLabel _Red_Bomb_Num;
+	private CCLabel Feiji_Life;
 	//精灵
 	private CCSprite _Red_Bomb;
 	private CCSprite _FeiJi_Play; //主飞机
@@ -99,6 +100,7 @@ public class FeiJi_Play extends CCColorLayer {
 	private int _ChangeImage_Delay = -1;//图片改变延时
 	private int _Pause_OR = -1;// 暂停点击判断
 	private int Red_Bomb_Num = 0;//红炸弹数
+	private int Feiji_Life_Num = 3;//飞机血量
 	/**
 	 * 背景是否移动
 	 */
@@ -115,10 +117,13 @@ public class FeiJi_Play extends CCColorLayer {
 	private int Blue_Red_Down_Time = 5;//蓝子弹和红子弹的随机数
 	private int FoeDown_Time = 8;//敌机下落速度
 	private boolean _Invincible = false; //无敌模式
+	private boolean isStart = false;//是否开始
 	/**
 	 * 是否是关卡模式
 	 */
 	private boolean _IsGK = false;
+	private int startNum = 3;
+	CCLabel _Wel_Label;
 	/**
 	 * 是否是自己点击的暂停，防止resume后dialog还在，背景却在播放的情况
 	 */
@@ -157,7 +162,7 @@ public class FeiJi_Play extends CCColorLayer {
 		_Share = CCDirector.sharedDirector().getActivity()
 				.getSharedPreferences("Share", Context.MODE_PRIVATE);
 		_WinSize = CCDirector.sharedDirector().displaySize();//获取屏幕大小
-		setIsTouchEnabled(true);
+		setIsTouchEnabled(false);
 
 		CCSprite _FeiJi_Back = CCSprite.sprite(_FeiJi_Back_Path);
 		//背景按屏幕比例放大
@@ -198,75 +203,109 @@ public class FeiJi_Play extends CCColorLayer {
 		feiji_Guanka = Feiji_Guanka.getInstance();
 		AddScore(); //第一次默认加载分数
 
-		this.schedule("GameFoes", 1f);// 0.5秒执行一次 添加敌机 包括动画
-		this.schedule("GameShot", 0.2f);//0.2秒发射一次
-		GamePlay();//添加飞机
-		this.schedule("AddPlay", 0.2f); //主飞机精灵变化
-		this.schedule("Detection", 0f);
-		this.schedule("AddRedBlueDown", 2.0f); //道具下降 包括动画
-		this.schedule("AddBigFoe", 0.2f); //大飞机精灵变化
-		
+		this.schedule("welLabel", 1f);
+
+			this.schedule("GameFoes", 1f);// 0.5秒执行一次 添加敌机 包括动画
+			this.schedule("GameShot", 0.2f);//0.2秒发射一次
+			GamePlay();//添加飞机
+			this.schedule("AddPlay", 0.2f); //主飞机精灵变化
+			this.schedule("Detection", 0f);
+			this.schedule("AddRedBlueDown", 2.0f); //道具下降 包括动画
+			this.schedule("AddBigFoe", 0.2f); //大飞机精灵变化
+
 		AddRedBomb();
-		
+		showLife();
+
 		soundPlayer = SoundPlayer.getInstance();
 		soundPlayer.startMusic();
 	}
-
-	public void GameFoes(float t) {
-
-		AddFoes();
-
+	public void showLife(){
+		if (Feiji_Life != null){
+			Feiji_Life.removeSelf();
+		}
+		Feiji_Life = CCLabel.makeLabel("血量："+Feiji_Life_Num, _Font_Path, 30);
+		Feiji_Life.setColor(ccColor3B.ccRED);
+		Feiji_Life.setString("血量：" + Feiji_Life_Num);
+		Feiji_Life.setPosition(CGPoint.ccp(_WinSize.getWidth() -
+				Feiji_Life.getTexture().getWidth() / 2 - 50, Feiji_Life.getContentSize().height / 2));
+		addChild(Feiji_Life);// 将关卡目标分添加到场景
 	}
-
+	public void GameFoes(float t) {
+		if(isStart) {
+			AddFoes();
+		}
+	}
+	public void welLabel(float t) {
+		if (_Wel_Label != null)
+			_Wel_Label.removeSelf();
+		if (startNum == 0 ) {
+			this.unschedule("welLabel");
+			isStart = true;
+			setIsTouchEnabled(true);
+			return;
+		}
+		_Wel_Label = CCLabel.makeLabel(""+startNum, _Font_Path,
+				200);
+		_Wel_Label.setColor(ccColor3B.ccBLACK);
+		_Wel_Label.setPosition(CGPoint.ccp(
+				_WinSize.getWidth() / 2,
+				_WinSize.getHeight() / 2));
+		addChild(_Wel_Label);// 添加炸弹数
+		startNum--;
+	}
 	public void GamePlay() {
-
-		AddPlay();
-
+		if(isStart) {
+			AddPlay();
+		}
 	}
 
 	public void GameShot(float t) {
-		AddShot();
+		if(isStart) {
+			AddShot();
+		}
 	}
 
 	/**
 	 * 随机添加红绿炸弹下降
 	 */
 	public void AddRedBlueDown(float t) {
-		Random rand = new Random();
-		int randomValue = rand.nextInt(Blue_Red_Down_Time);
-		CCSprite _Red_Blue_Down = null;
+		if(isStart) {
+			Random rand = new Random();
+			int randomValue = rand.nextInt(Blue_Red_Down_Time);
+			CCSprite _Red_Blue_Down = null;
 
-		if (randomValue != 0 && randomValue != 1) {
-			return;
+			if (randomValue != 0 && randomValue != 1) {
+				return;
+			}
+			if (_Red_Bombs.size() >= 1) {
+				return;
+			}
+
+			if (randomValue == 0 && _Red_Bombs.size() < 1) {
+				_Red_Blue_Down = CCSprite.sprite(_Red_Bomb_Down_Path); //红炸弹下落图片
+				_Red_Blue_Down.setTag(0);
+			} else if (randomValue == 1 && _Red_Bombs.size() < 1) {
+				_Red_Blue_Down = CCSprite.sprite(_Blue_Shot_Down_Path); //绿炸弹下落图片
+				_Red_Blue_Down.setTag(1);
+			}
+			int minX = (int) (_Red_Blue_Down.getContentSize().width / 2.0f);
+			int maxX = (int) (_WinSize.width - _Red_Blue_Down.getContentSize().width / 2.0f);
+			int rangeX = maxX - minX;
+			int actualX = rand.nextInt(rangeX) + minX;
+
+			_Red_Blue_Down
+					.setPosition(actualX, _Red_Blue_Down.getContentSize().height
+							/ 2.0f + _WinSize.height); //定义在屏幕外
+			addChild(_Red_Blue_Down);
+			_Red_Bombs.add(_Red_Blue_Down);
+			CCFiniteTimeAction fs_timeAction = CCMoveTo.action(1,
+					CGPoint.ccp(actualX, _WinSize.height / 3 * 2));// 掉落到 2/3
+
+			CCCallFuncN fs_back = CCCallFuncN.action(this, "Red_Bomb_Back");
+			CCSequence fs_actions = CCSequence.actions(fs_timeAction, fs_back);
+			_Red_Blue_Down.runAction(fs_actions);
+			Log.e(TAG, "------- RedBlue开始下落");
 		}
-		if (_Red_Bombs.size() >= 1) {
-			return;
-		}
-
-		if (randomValue == 0 && _Red_Bombs.size() < 1) {
-			_Red_Blue_Down = CCSprite.sprite(_Red_Bomb_Down_Path); //红炸弹下落图片
-			_Red_Blue_Down.setTag(0);
-		} else if (randomValue == 1 && _Red_Bombs.size() < 1) {
-			_Red_Blue_Down = CCSprite.sprite(_Blue_Shot_Down_Path); //绿炸弹下落图片
-			_Red_Blue_Down.setTag(1);
-		}
-		int minX = (int) (_Red_Blue_Down.getContentSize().width / 2.0f);
-		int maxX = (int) (_WinSize.width - _Red_Blue_Down.getContentSize().width / 2.0f);
-		int rangeX = maxX - minX;
-		int actualX = rand.nextInt(rangeX) + minX;
-
-		_Red_Blue_Down
-				.setPosition(actualX, _Red_Blue_Down.getContentSize().height
-						/ 2.0f + _WinSize.height); //定义在屏幕外
-		addChild(_Red_Blue_Down);
-		_Red_Bombs.add(_Red_Blue_Down);
-		CCFiniteTimeAction fs_timeAction = CCMoveTo.action(1,
-				CGPoint.ccp(actualX, _WinSize.height / 3 * 2));// 掉落到 2/3
-
-		CCCallFuncN fs_back = CCCallFuncN.action(this, "Red_Bomb_Back");
-		CCSequence fs_actions = CCSequence.actions(fs_timeAction, fs_back);
-		_Red_Blue_Down.runAction(fs_actions);
-		Log.e(TAG, "------- RedBlue开始下落");
 	}
 
 	/**
@@ -393,17 +432,18 @@ public class FeiJi_Play extends CCColorLayer {
 	 * 让大飞机背景一直变化
 	 */
 	public void AddBigFoe(float t) {
-		if (_BigFoes.size() > 0) {
-			_BigFoe_Image_Chage = -_BigFoe_Image_Chage;
-			FeiJi_Sprite BigFoe = (FeiJi_Sprite) _BigFoes.get(0);
-			if (_Play_Image_Chage == 1)
-				ChageSpriteBack(BigFoe, false, _BigFoe_Path, 0);
-			else
-				ChageSpriteBack(BigFoe, false, _BigFoe_Path2, 0);
-			BigFoe.getCCSprite().removeSelf();
-			_BigFoes.remove(0);
+		if(isStart) {
+			if (_BigFoes.size() > 0) {
+				_BigFoe_Image_Chage = -_BigFoe_Image_Chage;
+				FeiJi_Sprite BigFoe = (FeiJi_Sprite) _BigFoes.get(0);
+				if (_Play_Image_Chage == 1)
+					ChageSpriteBack(BigFoe, false, _BigFoe_Path, 0);
+				else
+					ChageSpriteBack(BigFoe, false, _BigFoe_Path2, 0);
+				BigFoe.getCCSprite().removeSelf();
+				_BigFoes.remove(0);
+			}
 		}
-
 	}
 
 	/**
@@ -663,40 +703,56 @@ public class FeiJi_Play extends CCColorLayer {
 			FeiJi_Sprite BigFoe = (FeiJi_Sprite) _BigFoes.get(j);
 			CGRect Rect2 = BigFoe.getCCSprite().getBoundingBox();
 			if (CGRect.intersects(Rect2, Rect3)) { //相交
-				StopSchedule();
-				AddSpriteAnimal(BigFoe.getCCSprite().getPosition(),
-						_BigFoe_Sequence_Path, 164, 245, 6);
-				BigFoe.getCCSprite().removeSelf();
-				_BigFoes.remove(j);
-				AddPlaySpriteAnimal(_FeiJi_Play.getPosition(),
-						_Play_Sequence_Path, 99, 123, 4);
-				_FeiJi_Play.removeSelf();
+				Feiji_Life_Num--;
+				showLife();
+				if (Feiji_Life_Num == 0){
+					//游戏结束音效
+					playEndSound();
+
+					StopSchedule();
+					AddSpriteAnimal(BigFoe.getCCSprite().getPosition(),
+							_BigFoe_Sequence_Path, 164, 245, 6);
+					BigFoe.getCCSprite().removeSelf();
+					_BigFoes.remove(j);
+					AddPlaySpriteAnimal(_FeiJi_Play.getPosition(),
+							_Play_Sequence_Path, 99, 123, 4);
+					_FeiJi_Play.removeSelf();
+				}
 			}
 		}
 		for (int j = 0; j < _Foes.size(); j++) {
 			FeiJi_Sprite Foe = _Foes.get(j);
 			CGRect Rect2 = Foe.getCCSprite().getBoundingBox();
 			if (CGRect.intersects(Rect2, Rect3)) {
-				//游戏结束音效
-				soundPlayer.pauseMusic();
-				soundPlayer.playSound(R.raw.game_over);
-				StopSchedule();
-				if (Foe.getCCSprite().getTag() == 2) {
-					AddSpriteAnimal(Foe.getCCSprite().getPosition(),
-							_SmallFoe_Sequence_Path, 52, 52, 3);
-				} else {
-					AddSpriteAnimal(Foe.getCCSprite().getPosition(),
-							_MiddleFoe_Sequence_Path, 69, 87, 4);
+				Feiji_Life_Num--;
+				showLife();
+				if (Feiji_Life_Num == 0) {
+					//游戏结束音效
+					playEndSound();
+
+					StopSchedule();
+					if (Foe.getCCSprite().getTag() == 2) {
+						AddSpriteAnimal(Foe.getCCSprite().getPosition(),
+								_SmallFoe_Sequence_Path, 52, 52, 3);
+					} else {
+						AddSpriteAnimal(Foe.getCCSprite().getPosition(),
+								_MiddleFoe_Sequence_Path, 69, 87, 4);
+					}
+					Foe.getCCSprite().removeSelf();
+					_Foes.remove(j);
+					AddPlaySpriteAnimal(_FeiJi_Play.getPosition(),
+							_Play_Sequence_Path, 99, 123, 4);
+					_FeiJi_Play.removeSelf();
 				}
-				Foe.getCCSprite().removeSelf();
-				_Foes.remove(j);
-				AddPlaySpriteAnimal(_FeiJi_Play.getPosition(),
-						_Play_Sequence_Path, 99, 123, 4);
-				_FeiJi_Play.removeSelf();
 			}
 		}
 	}
-
+	private void playEndSound(){
+		if (soundPlayer != null) {
+			soundPlayer.pauseMusic();
+			soundPlayer.playSound(R.raw.game_over);
+		}
+	}
 	/**
 	 *  停止持续的方法
 	 */
@@ -1219,7 +1275,6 @@ public class FeiJi_Play extends CCColorLayer {
 
 					@Override
 					public void onClick(View v) {
-						// TODO Auto-generated method stub
 						IntentToBack();
 						_Dialog.dismiss();
 						soundPlayer.startMusic();

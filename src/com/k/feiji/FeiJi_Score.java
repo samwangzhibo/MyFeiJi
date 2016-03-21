@@ -22,14 +22,12 @@ public class FeiJi_Score extends FeiJi_BaseAc {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.feiji_score);
 		Init();
 	}
 
 	private void Init() {
-		// TODO Auto-generated method stub
 		_Share = getSharedPreferences("Share", Context.MODE_PRIVATE);
 		String _Score = _Share.getString("SCORE", "0;0;0;0;0;0;0;0;0;0");
 		String[] _Scores = _Score.split(";");
@@ -53,25 +51,21 @@ public class FeiJi_Score extends FeiJi_BaseAc {
 
 		@Override
 		public int getCount() {
-			// TODO Auto-generated method stub
 			return _Lists.length;
 		}
 
 		@Override
 		public Object getItem(int position) {
-			// TODO Auto-generated method stub
 			return null;
 		}
 
 		@Override
 		public long getItemId(int position) {
-			// TODO Auto-generated method stub
 			return 0;
 		}
 
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
-			// TODO Auto-generated method stub
 			if (convertView == null) {
 				convertView = _Inflater
 						.inflate(R.layout.feiji_score_item, null);
@@ -96,7 +90,6 @@ public class FeiJi_Score extends FeiJi_BaseAc {
 
 						@Override
 						public void onClick(View v) {
-							// TODO Auto-generated method stub
 							finish();
 						}
 					});

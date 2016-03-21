@@ -51,14 +51,14 @@ public class FeiJi_Menu extends FeiJi_BaseAc implements OnClickListener{
 		_FeiJi_Button_Guanka.setOnClickListener(this);
 		_FeiJi_Button_Abourt.setOnClickListener(this);
 
-		
+		sharedPrefUtil.init(getApplicationContext());
 		soundPlayer = SoundPlayer.getInstance();
 		soundPlayer.init(this);
 		soundPlayer.musicSt = sharedPrefUtil.getBoolean("music");
 		soundPlayer.soundSt = sharedPrefUtil.getBoolean("sound");
+
 		soundPlayer.startMusic();
 
-		sharedPrefUtil.init(getApplicationContext());
 	}
 
 	
@@ -154,7 +154,7 @@ public class FeiJi_Menu extends FeiJi_BaseAc implements OnClickListener{
 								v2.setText(getString(R.string.setting_bgflow_off));
 								sharedPrefUtil.putBoolean("bgflow", false);
 							} else {
-								v2.setText(getString(R.string.setting_bgflow_off));
+								v2.setText(getString(R.string.setting_bgflow_on));
 								sharedPrefUtil.putBoolean("bgflow", true);
 							}
 							break;
@@ -196,6 +196,7 @@ public class FeiJi_Menu extends FeiJi_BaseAc implements OnClickListener{
 						switch(which){
 							case 0:
 								soundPlayer.changeAndPlayMusic(SoundPlayer.musicId);
+
 								break;
 							case 1:
 								soundPlayer.changeAndPlayMusic(SoundPlayer.musicHDL);

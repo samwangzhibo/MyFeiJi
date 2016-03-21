@@ -48,13 +48,11 @@ public class FeiJi_Play2 extends CCColorLayer{
 	private boolean Blue_Shot_Change = false;//是否蓝子弹
 	private String _Blue_Shot = "images/blue_shot.png";
 	protected FeiJi_Play2(ccColor4B color) {
-		// TODO Auto-generated constructor stub
 		super(color);
 		Init();
 	}
 
 	private void Init() {
-		// TODO Auto-generated method stub
 		_Share = CCDirector.sharedDirector().getActivity()
 				.getSharedPreferences("Share", Context.MODE_PRIVATE);
 		//获取屏幕大小
