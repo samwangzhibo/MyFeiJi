@@ -42,14 +42,14 @@ public class SoundPlayer {
         return isInit;
     }
 
-    public static void init(Context c)
+    public static void init(Context c, int resourse)
     {
         isInit = true;
 
         context = c;
  
-        initMusic(musicId);
-         
+        initMusic(resourse);
+
         initSound();
     }
      

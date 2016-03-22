@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.KeyEvent;
 
 import com.baidu.mobstat.StatService;
+import com.k.feiji.util.SharedPrefUtil;
 import com.k.feiji.util.SoundPlayer;
 
 import org.cocos2d.layers.CCScene;
@@ -17,7 +18,7 @@ public class FeiJi_Main extends FeiJi_BaseAc {
 	private CCGLSurfaceView _FeiJi_Surface;
 	private CCScene _FeiJi_Scene;
 	SoundPlayer soundPlayer;
-
+	SharedPrefUtil sharedPrefUtil = SharedPrefUtil.getInstance();
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -25,8 +26,10 @@ public class FeiJi_Main extends FeiJi_BaseAc {
 		setContentView(_FeiJi_Surface);
 
 		soundPlayer = SoundPlayer.getInstance();
-		if (!soundPlayer.isInit())
-		soundPlayer.init(this);
+		if (!soundPlayer.isInit()){
+			int resourse = sharedPrefUtil.getBgMusic("BgMusic");
+			soundPlayer.init(this,resourse);
+		}
 	}
 
 	@Override

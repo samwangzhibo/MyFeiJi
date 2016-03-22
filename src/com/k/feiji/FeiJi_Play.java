@@ -63,7 +63,12 @@ public class FeiJi_Play extends CCColorLayer {
 	private CGPoint _Touch_Location;
 
 	private String _Font_Path = "Cookies.ttf";
-	private String _FeiJi_Back_Path = "images/feiji_background.png";
+	private String _FeiJi_Back_Path1 = "images/feiji_background.png";
+	private String _FeiJi_Back_Path2 = "images/map_bg0.png";
+	private String _FeiJi_Back_Path3 = "images/map_bg1.png";
+	private String _FeiJi_Back_Path4 = "images/map_bg2.png";
+	private String _FeiJi_Actual_Back_Path;
+
 	private String _MiddleFoe_Path_2 = "images/middlefoe_2.png";
 	private String _SmallFoe_Path = "images/smallfoe.png";
 	private String _MiddleFoe_Path = "images/middlefoe.png";
@@ -158,13 +163,30 @@ public class FeiJi_Play extends CCColorLayer {
 	}
 	private void Init() {
 		Is_Bg_Move = sharedPrefUtil.getBoolean("bgflow");
+		_Invincible = sharedPrefUtil.getBoolean("InvincibleST");
 
 		_Share = CCDirector.sharedDirector().getActivity()
 				.getSharedPreferences("Share", Context.MODE_PRIVATE);
 		_WinSize = CCDirector.sharedDirector().displaySize();//获取屏幕大小
 		setIsTouchEnabled(false);
 
-		CCSprite _FeiJi_Back = CCSprite.sprite(_FeiJi_Back_Path);
+		int a = new Random().nextInt(4)+1;
+		switch (a){
+			case 1:
+				_FeiJi_Actual_Back_Path = _FeiJi_Back_Path1;
+				break;
+			case 2:
+				_FeiJi_Actual_Back_Path = _FeiJi_Back_Path2;
+				break;
+			case 3:
+				_FeiJi_Actual_Back_Path = _FeiJi_Back_Path3;
+				break;
+			case 4:
+				_FeiJi_Actual_Back_Path = _FeiJi_Back_Path4;
+				break;
+		}
+
+		CCSprite _FeiJi_Back = CCSprite.sprite(_FeiJi_Actual_Back_Path);
 		//背景按屏幕比例放大
 		_FeiJi_Back.setScaleX(_WinSize.width
 				/ _FeiJi_Back.getTexture().getWidth());
@@ -179,7 +201,7 @@ public class FeiJi_Play extends CCColorLayer {
 		addChild(_FeiJi_Back);// 添加背景到场景
 
 		if(Is_Bg_Move) {
-			CCSprite _FeiJi_Back2 = CCSprite.sprite(_FeiJi_Back_Path);
+			CCSprite _FeiJi_Back2 = CCSprite.sprite(_FeiJi_Actual_Back_Path);
 			//背景按屏幕比例放大
 			_FeiJi_Back2.setScaleX(_WinSize.width
 					/ _FeiJi_Back.getTexture().getWidth());
@@ -195,6 +217,9 @@ public class FeiJi_Play extends CCColorLayer {
 
 
 		_FeiJi_Pause = CCSprite.sprite(_Pause_Path);
+		_FeiJi_Pause.setScale(3);
+		_FeiJi_Pause.getFlipX();
+		_FeiJi_Pause.getScaleX();
 		_FeiJi_Pause.setPosition(CGPoint.make(
 				_FeiJi_Pause.getContentSize().width / 2 + 1, _WinSize.height
 						- _FeiJi_Pause.getContentSize().height / 2 - 1));
@@ -703,20 +728,27 @@ public class FeiJi_Play extends CCColorLayer {
 			FeiJi_Sprite BigFoe = (FeiJi_Sprite) _BigFoes.get(j);
 			CGRect Rect2 = BigFoe.getCCSprite().getBoundingBox();
 			if (CGRect.intersects(Rect2, Rect3)) { //相交
-				Feiji_Life_Num--;
-				showLife();
-				if (Feiji_Life_Num == 0){
-					//游戏结束音效
-					playEndSound();
 
-					StopSchedule();
-					AddSpriteAnimal(BigFoe.getCCSprite().getPosition(),
-							_BigFoe_Sequence_Path, 164, 245, 6);
-					BigFoe.getCCSprite().removeSelf();
-					_BigFoes.remove(j);
-					AddPlaySpriteAnimal(_FeiJi_Play.getPosition(),
-							_Play_Sequence_Path, 99, 123, 4);
-					_FeiJi_Play.removeSelf();
+				AddSpriteAnimal(BigFoe.getCCSprite().getPosition(),
+						_BigFoe_Sequence_Path, 164, 245, 6);
+				soundPlayer.playSound(R.raw.enemy2_down);
+				ChageScore(30000);
+				BigFoe.getCCSprite().removeSelf();
+				_BigFoes.remove(j);
+
+				if (!_Invincible) {
+					Feiji_Life_Num--;
+					showLife();
+					if (Feiji_Life_Num == 0) {
+						//游戏结束音效
+						playEndSound();
+
+						StopSchedule();
+
+						AddPlaySpriteAnimal(_FeiJi_Play.getPosition(),
+								_Play_Sequence_Path, 99, 123, 4);
+						_FeiJi_Play.removeSelf();
+					}
 				}
 			}
 		}
@@ -724,25 +756,34 @@ public class FeiJi_Play extends CCColorLayer {
 			FeiJi_Sprite Foe = _Foes.get(j);
 			CGRect Rect2 = Foe.getCCSprite().getBoundingBox();
 			if (CGRect.intersects(Rect2, Rect3)) {
-				Feiji_Life_Num--;
-				showLife();
-				if (Feiji_Life_Num == 0) {
-					//游戏结束音效
-					playEndSound();
 
-					StopSchedule();
-					if (Foe.getCCSprite().getTag() == 2) {
-						AddSpriteAnimal(Foe.getCCSprite().getPosition(),
-								_SmallFoe_Sequence_Path, 52, 52, 3);
-					} else {
-						AddSpriteAnimal(Foe.getCCSprite().getPosition(),
-								_MiddleFoe_Sequence_Path, 69, 87, 4);
+				if (Foe.getCCSprite().getTag() == 2) {
+					AddSpriteAnimal(Foe.getCCSprite().getPosition(),
+							_SmallFoe_Sequence_Path, 52, 52, 3);
+					soundPlayer.playSound(R.raw.enemy1_down);
+					ChageScore(1000);
+				} else {
+					AddSpriteAnimal(Foe.getCCSprite().getPosition(),
+							_MiddleFoe_Sequence_Path, 69, 87, 4);
+					soundPlayer.playSound(R.raw.enemy3_down);
+					ChageScore(6000);
+				}
+				Foe.getCCSprite().removeSelf();
+				_Foes.remove(j);
+
+				if (!_Invincible) {
+					Feiji_Life_Num--;
+					showLife();
+					if (Feiji_Life_Num == 0) {
+						//游戏结束音效
+						playEndSound();
+
+						StopSchedule();
+
+						AddPlaySpriteAnimal(_FeiJi_Play.getPosition(),
+								_Play_Sequence_Path, 99, 123, 4);
+						_FeiJi_Play.removeSelf();
 					}
-					Foe.getCCSprite().removeSelf();
-					_Foes.remove(j);
-					AddPlaySpriteAnimal(_FeiJi_Play.getPosition(),
-							_Play_Sequence_Path, 99, 123, 4);
-					_FeiJi_Play.removeSelf();
 				}
 			}
 		}
@@ -880,9 +921,9 @@ public class FeiJi_Play extends CCColorLayer {
 				}
 			}
 		}
-		if (!_Invincible) {
+
 			PlayOver();
-		}
+
 	}
 	private void BgMove(CCSprite _FeiJi_Back){
 		if (_FeiJi_Back != null){

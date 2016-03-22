@@ -53,8 +53,10 @@ public class FeiJi_Menu extends FeiJi_BaseAc implements OnClickListener{
 
 		sharedPrefUtil.init(getApplicationContext());
 		soundPlayer = SoundPlayer.getInstance();
-		soundPlayer.init(this);
-		soundPlayer.musicSt = sharedPrefUtil.getBoolean("music");
+		int resourse = sharedPrefUtil.getBgMusic("BgMusic");
+
+		soundPlayer.init(this,resourse);
+		soundPlayer.musicSt = sharedPrefUtil.getBoolean("musicST");
 		soundPlayer.soundSt = sharedPrefUtil.getBoolean("sound");
 
 		soundPlayer.startMusic();
@@ -126,11 +128,11 @@ public class FeiJi_Menu extends FeiJi_BaseAc implements OnClickListener{
 							if (v.getText().toString().equals(getResources().getString(R.string.setting_music_on))) {
 								v.setText(getString(R.string.setting_music_off));
 								soundPlayer.setMusicSt(false);
-								sharedPrefUtil.putBoolean("music",false);
+								sharedPrefUtil.putBoolean("musicST",false);
 							} else {
 								v.setText(getString(R.string.setting_music_on));
 								soundPlayer.setMusicSt(true);
-								sharedPrefUtil.putBoolean("music", true);
+								sharedPrefUtil.putBoolean("musicST", true);
 							}
 							break;
 						case R.id.setting_sound_on:
@@ -156,6 +158,16 @@ public class FeiJi_Menu extends FeiJi_BaseAc implements OnClickListener{
 							} else {
 								v2.setText(getString(R.string.setting_bgflow_on));
 								sharedPrefUtil.putBoolean("bgflow", true);
+							}
+							break;
+						case R.id.setting_Invincible_off:
+							Button v3 = (Button) view;
+							if (v3.getText().toString().equals(getResources().getString(R.string.setting_Invincible_off))) {
+								v3.setText(getString(R.string.setting_Invincible_on));
+								sharedPrefUtil.putBoolean("InvincibleST", true);
+							} else {
+								v3.setText(getString(R.string.setting_Invincible_off));
+								sharedPrefUtil.putBoolean("InvincibleST", false);
 							}
 							break;
 				}
@@ -196,10 +208,11 @@ public class FeiJi_Menu extends FeiJi_BaseAc implements OnClickListener{
 						switch(which){
 							case 0:
 								soundPlayer.changeAndPlayMusic(SoundPlayer.musicId);
-
+								sharedPrefUtil.putBgMusic("BgMusic",SoundPlayer.musicId);
 								break;
 							case 1:
 								soundPlayer.changeAndPlayMusic(SoundPlayer.musicHDL);
+								sharedPrefUtil.putBgMusic("BgMusic", SoundPlayer.musicHDL);
 								break;
 						}
 						Toast.makeText(FeiJi_Menu.this, "当前主题： "+SoundPlayer.MUSICS[which], Toast.LENGTH_SHORT).show();

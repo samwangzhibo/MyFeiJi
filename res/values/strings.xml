@@ -24,6 +24,10 @@
     <string name="setting_bgflow_on">背景移动 on</string>
     <string name="setting_bgflow_off">背景移动 off</string>
 
+    <string name="setting_Invincible_off">无敌模式 off</string>
+    <string name="setting_Invincible_on">无敌模式 on</string>
+
+
     <color name="black">#ff000000</color>
     <color name="gray">#7B797B</color>
     

@@ -40,7 +40,7 @@ public class SharedPrefUtil {
         }
         return SoundPlayer.musicId;
     }
-    public void putInt(String name , int value){
+    public void putBgMusic(String name , int value){
         if (sharedPreferences != null){
             sharedPreferences.edit().putInt(name, value).commit();
         }

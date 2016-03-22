@@ -24,7 +24,8 @@ public class SettingFragment extends Fragment implements View.OnClickListener{
         Button settingMusicOn = (Button) v.findViewById(R.id.setting_music_on);
         Button settingSoundOn = (Button) v.findViewById(R.id.setting_sound_on);
         Button settingBgflowOn = (Button) v.findViewById(R.id.setting_bgflow_on);
-        if(!sharedPrefUtil.getBoolean("music")){
+        Button settingInvilable = (Button) v.findViewById(R.id.setting_Invincible_off);
+        if(!sharedPrefUtil.getBoolean("musicST")){
             settingMusicOn.setText(getString(R.string.setting_music_off));
         }
         if (!sharedPrefUtil.getBoolean("sound")){
@@ -33,7 +34,9 @@ public class SettingFragment extends Fragment implements View.OnClickListener{
         if (!sharedPrefUtil.getBoolean("bgflow")){
             settingBgflowOn.setText(getString(R.string.setting_bgflow_off));
         }
-
+        if (sharedPrefUtil.getBoolean("InvincibleST")){
+            settingInvilable.setText(getString(R.string.setting_Invincible_on));
+        }
 
         Button settingMusicStyle = (Button) v.findViewById(R.id.setting_music_style);
         Button settingBack = (Button) v.findViewById(R.id.setting_back);
@@ -43,6 +46,7 @@ public class SettingFragment extends Fragment implements View.OnClickListener{
         settingMusicStyle.setOnClickListener(this);
         settingBgflowOn.setOnClickListener(this);
         settingBack.setOnClickListener(this);
+        settingInvilable.setOnClickListener(this);
         return v;
     }
 
