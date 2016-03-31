@@ -1,4 +1,5 @@
 package com.k.feiji;
+
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Dialog;
@@ -48,7 +49,8 @@ public class FeiJi_Play extends CCColorLayer {
 	private static final String TAG = FeiJi_Play.class.getSimpleName();
 	private List<FeiJi_Sprite> _Foes = new CopyOnWriteArrayList<FeiJi_Sprite>(); //中小飞机
 	private List<FeiJi_Sprite> _BigFoes = new CopyOnWriteArrayList<FeiJi_Sprite>(); //大飞机
-	private List<CCSprite> _Shots = new CopyOnWriteArrayList<CCSprite>();
+	private List<CCSprite> _Shots = new CopyOnWriteArrayList<CCSprite>();// 自己的子弹
+	private List<CCSprite> _Foes_Shots = new CopyOnWriteArrayList<CCSprite>(); //敌机子弹
 	private List<CCSprite> _Red_Bombs = new CopyOnWriteArrayList<CCSprite>(); //红绿炸弹
 	private List<FeiJi_Sprite> _AllFoes = new CopyOnWriteArrayList<FeiJi_Sprite>(); //全部飞机
 	//文本框
@@ -94,6 +96,10 @@ public class FeiJi_Play extends CCColorLayer {
 	 */
 	private float _Shot_Du = 0.5f;
 	/**
+	 * 大飞机子弹速度（可调控）
+	 */
+	private float BigFoe_Shot_Du = 2.0f;
+	/**
 	 * 根据手指位置判断飞机是否可以移动
 	 */
 	private boolean _Can_Move = false;
@@ -106,14 +112,16 @@ public class FeiJi_Play extends CCColorLayer {
 	private int _Pause_OR = -1;// 暂停点击判断
 	private int Red_Bomb_Num = 0;//红炸弹数
 	private int Feiji_Life_Num = 3;//飞机血量
+	private int Big_Shot_Index = 1;
+	private int Small_Foe_Down1_Index = 1;
 	/**
 	 * 背景是否移动
 	 */
 	private boolean Is_Bg_Move = false;
 	/**
-	 * 打飞机最大数量
+	 * 大飞机最大数量
 	 */
-	private int BigFoes_Max_Size = 1;
+	private int BigFoes_Max_Size = 2;
 	/**
 	 * 是否蓝子弹
 	 */
@@ -159,7 +167,6 @@ public class FeiJi_Play extends CCColorLayer {
 		super(color);
 		this._IsGK = isgk;
 		Init();
-		
 	}
 	private void Init() {
 		Is_Bg_Move = sharedPrefUtil.getBoolean("bgflow");
@@ -176,13 +183,13 @@ public class FeiJi_Play extends CCColorLayer {
 				_FeiJi_Actual_Back_Path = _FeiJi_Back_Path1;
 				break;
 			case 2:
-				_FeiJi_Actual_Back_Path = _FeiJi_Back_Path2;
+				_FeiJi_Actual_Back_Path = _FeiJi_Back_Path1;
 				break;
 			case 3:
-				_FeiJi_Actual_Back_Path = _FeiJi_Back_Path3;
+				_FeiJi_Actual_Back_Path = _FeiJi_Back_Path1;
 				break;
 			case 4:
-				_FeiJi_Actual_Back_Path = _FeiJi_Back_Path4;
+				_FeiJi_Actual_Back_Path = _FeiJi_Back_Path1;
 				break;
 		}
 
@@ -217,9 +224,6 @@ public class FeiJi_Play extends CCColorLayer {
 
 
 		_FeiJi_Pause = CCSprite.sprite(_Pause_Path);
-		_FeiJi_Pause.setScale(3);
-		_FeiJi_Pause.getFlipX();
-		_FeiJi_Pause.getScaleX();
 		_FeiJi_Pause.setPosition(CGPoint.make(
 				_FeiJi_Pause.getContentSize().width / 2 + 1, _WinSize.height
 						- _FeiJi_Pause.getContentSize().height / 2 - 1));
@@ -230,13 +234,15 @@ public class FeiJi_Play extends CCColorLayer {
 
 		this.schedule("welLabel", 1f);
 
-			this.schedule("GameFoes", 1f);// 0.5秒执行一次 添加敌机 包括动画
+			this.schedule("GameFoes", 2f);// 0.5秒执行一次 添加敌机 包括动画
 			this.schedule("GameShot", 0.2f);//0.2秒发射一次
 			GamePlay();//添加飞机
 			this.schedule("AddPlay", 0.2f); //主飞机精灵变化
 			this.schedule("Detection", 0f);
 			this.schedule("AddRedBlueDown", 2.0f); //道具下降 包括动画
 			this.schedule("AddBigFoe", 0.2f); //大飞机精灵变化
+
+			this.schedule("AddBigShot", 2.5f); //大飞机发子弹
 
 		AddRedBomb();
 		showLife();
@@ -290,6 +296,79 @@ public class FeiJi_Play extends CCColorLayer {
 		}
 	}
 
+	/**
+	 * 大飞机发3次子弹
+	 * @param t
+	 */
+	public void BigShot3(float t) {
+		if (Big_Shot_Index != 4){
+			for (FeiJi_Sprite bigFeiji : _BigFoes){
+
+				//添加子弹
+				CCSprite _FeiJi_Shot = CCSprite.sprite(_Shot_Path);
+				CCSprite BigFoe =  bigFeiji.getCCSprite();
+
+				float localX = 0, localY = 0;
+
+				localX = bigFeiji.getInitX() ;
+				localY = bigFeiji.getInitY() - BigFoe.getContentSize().height/2 - _FeiJi_Shot.getContentSize().height/2 - 20;
+
+
+				_FeiJi_Shot.setPosition(localX, localY);
+				addChild(_FeiJi_Shot);
+
+				_Foes_Shots.add(_FeiJi_Shot);//添加子弹
+				/*	float[] a =  getShotToPosition(localX, localY, _FeiJi_Play.getPosition().x, _FeiJi_Play.getPosition().y, _WinSize.width, _WinSize.height);
+					CCFiniteTimeAction fs_timeAction = CCMoveTo.action(BigFoe_Shot_Du, CGPoint
+							.ccp(a[0],a[1]));// CCMoveTo*/
+
+				CCFiniteTimeAction fs_timeAction = CCMoveTo.action(BigFoe_Shot_Du, CGPoint
+						.ccp(_FeiJi_Play.getPosition().x, _FeiJi_Play.getPosition().y));// CCMoveTo
+				CCCallFuncN fs_Over = null;
+				fs_Over = CCCallFuncN.action(this, "Foes_Shot_Over");
+
+				CCSequence fs_actions = CCSequence.actions(fs_timeAction, fs_Over);
+				_FeiJi_Shot.runAction(fs_actions);
+
+			}
+			Big_Shot_Index++;
+		}else {
+			unschedule("BigShot3");
+			Big_Shot_Index = 1;
+			return;
+		}
+	}
+	/**
+	 * 添加大敌机射击
+	 * @param t
+	 */
+	public void AddBigShot(float t){
+		if(isStart) {
+			//如果没有大飞机返回
+			if (_BigFoes.size() == 0)
+				return;
+			else{
+				this.schedule("BigShot3", 0.2f); //大飞机发子弹
+			}
+		}
+	}
+	public float[] getShotToPosition(float localx, float localy, float mplayx, float mplayy, float windowx, float windowy){
+		float[] a = new float[2];
+		float deltax = Math.abs(mplayx - localx);
+		float deltay = Math.abs(mplayy - localy);
+		if (mplayx < localx){
+			a[0] = localx - (deltay / deltax) * windowx;
+		}else {
+			a[0] = localx + (deltay / deltax) * windowx;
+		}
+		if (mplayy > localy) {
+			a[1] = localy + (deltay / deltax) * windowy; //斜率乘以长度
+		}else {
+			a[1] = localy - (deltay / deltax) * windowy;
+		}
+		Log.e("wzb  ------ >","x  === "+a[0]+"    y ===   "+a[1]);
+		return a;
+	}
 	/**
 	 * 随机添加红绿炸弹下降
 	 */
@@ -416,11 +495,74 @@ public class FeiJi_Play extends CCColorLayer {
 			_FeiJi_Foe.setMax_Life(_Small_life);
 			_FeiJi_Foe.setCCSprite(_SmallFoe_Path);
 			FoeDown(_FeiJi_Foe, 2);
+			SmallFejiType(1);
 		}
 		_AllFoes.add(_FeiJi_Foe);
-
 	}
 
+	/**
+	 * 小飞机AI
+	 * @param type
+	 */
+	private void SmallFejiType(int type) {
+		switch (type){
+			case 1:
+				this.schedule("smallFoeDown1",0.2f);
+				break;
+			default:
+				break;
+		}
+	}
+
+	/**
+	 * 小飞机第一种飞行效果
+	 * @param t
+	 */
+	public void smallFoeDown1(float t) {
+		if (Small_Foe_Down1_Index != 4) {
+			Log.e("wzb ------ >","添加小飞机"+Small_Foe_Down1_Index);
+			// TODO: 2016/3/31 添加多架飞机
+			FeiJi_Sprite _FeiJi_Foe = new FeiJi_Sprite();
+			_FeiJi_Foe.setClicked_Or(false);
+			_FeiJi_Foe.setLift(_Small_life);
+			_FeiJi_Foe.setMax_Life(_Small_life);
+			_FeiJi_Foe.setCCSprite(_SmallFoe_Path);
+			_FeiJi_Foe.getCCSprite().setTag(2); //小飞机
+
+			Random rand = new Random();
+			int actualX = (int) (0 -_FeiJi_Foe.getCCSprite().getContentSize().width / 2); //实际x位置
+
+			_FeiJi_Foe.setInitX(actualX);
+			_FeiJi_Foe.setInitDuration(2);
+			_FeiJi_Foe.setInitY(_WinSize.height * 2 / 3); //飞机头部刚刚在外面
+			CCSprite _Feiji_Sprite = _FeiJi_Foe.getCCSprite();
+			_Feiji_Sprite.setPosition(
+					actualX, _WinSize.height * 2 / 3);
+			double a = Math.toDegrees(Math.atan (_WinSize.height / (3 * _WinSize.width)));
+			Log.e("wzb", a+" degrees");
+			_Feiji_Sprite.setRotation((float) -(90-a));
+			addChild(_Feiji_Sprite);
+
+			// TODO: 2016/3/17 增加飞机路径的AI
+
+			CCFiniteTimeAction fs_timeAction = CCMoveTo.action(2,
+					CGPoint.ccp(_WinSize.width + _FeiJi_Foe.getCCSprite().getContentSize().width / 2,  _WinSize.height / 3));//实践内移动，注意不是moveBy
+			CCCallFuncN fs_Over = null; //动画对象
+
+			fs_Over = CCCallFuncN.action(this, "Foe_Over");
+
+			CCSequence fs_actions = CCSequence.actions(fs_timeAction, fs_Over);//执行完动画，执行"BigFoe_Over"方法
+			_FeiJi_Foe.getCCSprite().runAction(fs_actions);
+
+			_AllFoes.add(_FeiJi_Foe);
+			_Foes.add(_FeiJi_Foe);
+			Small_Foe_Down1_Index++;
+		} else {
+			unschedule("smallFoeDown1");
+			Small_Foe_Down1_Index = 1;
+			return;
+		}
+	}
 	/**
 	 * 让主飞机背景一直变化
 	 */
@@ -462,9 +604,9 @@ public class FeiJi_Play extends CCColorLayer {
 				_BigFoe_Image_Chage = -_BigFoe_Image_Chage;
 				FeiJi_Sprite BigFoe = (FeiJi_Sprite) _BigFoes.get(0);
 				if (_Play_Image_Chage == 1)
-					ChageSpriteBack(BigFoe, false, _BigFoe_Path, 0);
+					ChageSpriteBack(BigFoe, false, _BigFoe_Path, 0, BigFoe.getCCSprite().getRotation());
 				else
-					ChageSpriteBack(BigFoe, false, _BigFoe_Path2, 0);
+					ChageSpriteBack(BigFoe, false, _BigFoe_Path2, 0, BigFoe.getCCSprite().getRotation());
 				BigFoe.getCCSprite().removeSelf();
 				_BigFoes.remove(0);
 			}
@@ -643,6 +785,7 @@ public class FeiJi_Play extends CCColorLayer {
 				break;
 			}
 		}
+		ReMoveAllShot();
 	}
 
 	/**
@@ -651,6 +794,14 @@ public class FeiJi_Play extends CCColorLayer {
 	public void Shot_Over(Object sender) {
 		CCSprite shot_over = (CCSprite) sender;
 		_Shots.remove(shot_over);
+		shot_over.removeSelf();
+	}
+	/**
+	 *   移除敌机子弹
+	 */
+	public void Foes_Shot_Over(Object sender) {
+		CCSprite shot_over = (CCSprite) sender;
+		_Foes_Shots.remove(shot_over);
 		shot_over.removeSelf();
 	}
 
@@ -709,6 +860,7 @@ public class FeiJi_Play extends CCColorLayer {
 
 	@Override
 	public boolean ccTouchesMoved(MotionEvent event) {
+
 		if (_Can_Move) {
 			_Touch_Location = CCDirector.sharedDirector().convertToGL(
 					CGPoint.ccp(event.getX(), event.getY()));
@@ -724,13 +876,39 @@ public class FeiJi_Play extends CCColorLayer {
 		CGRect Rect = _FeiJi_Play.getBoundingBox();
 		CGRect Rect3 = CGRect.make(Rect.origin.x + (Rect.size.width / 3.2f),
 				Rect.origin.y, (Rect.size.width / 3.2f), Rect.size.height);
+		//添加子弹和主机的撞击碰撞
+		for(int j=0 ; j < _Foes_Shots.size(); j++){
+			CCSprite BigFoeShot =  _Foes_Shots.get(j);
+			CGRect Rect2 = BigFoeShot.getBoundingBox();
+			if (CGRect.intersects(Rect2, Rect3)) { //相交
+
+				_Foes_Shots.remove(BigFoeShot);
+				BigFoeShot.removeSelf();
+
+				if (!_Invincible) {
+					Feiji_Life_Num--;
+					showLife();
+					if (Feiji_Life_Num == 0) {
+						//游戏结束音效
+						playEndSound();
+
+						StopSchedule();
+
+						AddPlaySpriteAnimal(_FeiJi_Play.getPosition(),
+								_Play_Sequence_Path, 99, 123, 4);
+						_FeiJi_Play.removeSelf();
+					}
+				}
+			}
+		}
+
 		for (int j = 0; j < _BigFoes.size(); j++) {
 			FeiJi_Sprite BigFoe = (FeiJi_Sprite) _BigFoes.get(j);
 			CGRect Rect2 = BigFoe.getCCSprite().getBoundingBox();
 			if (CGRect.intersects(Rect2, Rect3)) { //相交
 
 				AddSpriteAnimal(BigFoe.getCCSprite().getPosition(),
-						_BigFoe_Sequence_Path, 164, 245, 6);
+						_BigFoe_Sequence_Path, 164, 245, 6, BigFoe.getCCSprite().getRotation());
 				soundPlayer.playSound(R.raw.enemy2_down);
 				ChageScore(30000);
 				BigFoe.getCCSprite().removeSelf();
@@ -759,12 +937,12 @@ public class FeiJi_Play extends CCColorLayer {
 
 				if (Foe.getCCSprite().getTag() == 2) {
 					AddSpriteAnimal(Foe.getCCSprite().getPosition(),
-							_SmallFoe_Sequence_Path, 52, 52, 3);
+							_SmallFoe_Sequence_Path, 52, 52, 3, Foe.getCCSprite().getRotation());
 					soundPlayer.playSound(R.raw.enemy1_down);
 					ChageScore(1000);
 				} else {
 					AddSpriteAnimal(Foe.getCCSprite().getPosition(),
-							_MiddleFoe_Sequence_Path, 69, 87, 4);
+							_MiddleFoe_Sequence_Path, 69, 87, 4, Foe.getCCSprite().getRotation());
 					soundPlayer.playSound(R.raw.enemy3_down);
 					ChageScore(6000);
 				}
@@ -836,9 +1014,9 @@ public class FeiJi_Play extends CCColorLayer {
 						//大飞机毁灭音效
 						soundPlayer.playSound(R.raw.enemy2_down);
 						AddSpriteAnimal(BigFoe.getCCSprite().getPosition(), //精灵消失帧动画
-								_BigFoe_Sequence_Path, 164, 245, 6);
+								_BigFoe_Sequence_Path, 164, 245, 6, BigFoe.getCCSprite().getRotation());
 					} else {
-						ChageSpriteBack(BigFoe, true, _BigFoe_Path_2, 0); //改变背景
+						ChageSpriteBack(BigFoe, true, _BigFoe_Path_2, 0, BigFoe.getCCSprite().getRotation()); //改变背景
 						BigFoe.getCCSprite().removeSelf();
 						_BigFoes.remove(j);
 					}
@@ -846,7 +1024,7 @@ public class FeiJi_Play extends CCColorLayer {
 				else {
 					_ChangeImage_Delay++;
 					if (BigFoe.getClicked_Or() && _ChangeImage_Delay >= 10) {
-						ChageSpriteBack(BigFoe, false, _BigFoe_Path, 0);
+						ChageSpriteBack(BigFoe, false, _BigFoe_Path, 0, BigFoe.getCCSprite().getRotation());
 						BigFoe.getCCSprite().removeSelf();
 						_BigFoes.remove(j);
 					}
@@ -869,12 +1047,12 @@ public class FeiJi_Play extends CCColorLayer {
 							ChageScore(1000);
 							soundPlayer.playSound(R.raw.enemy1_down);
 							AddSpriteAnimal(Foe.getCCSprite().getPosition(),
-									_SmallFoe_Sequence_Path, 52, 52, 3);
+									_SmallFoe_Sequence_Path, 52, 52, 3, Foe.getCCSprite().getRotation());
 						} else {
 							ChageScore(6000);
 							soundPlayer.playSound(R.raw.enemy3_down);
 							AddSpriteAnimal(Foe.getCCSprite().getPosition(),
-									_MiddleFoe_Sequence_Path, 69, 87, 4);
+									_MiddleFoe_Sequence_Path, 69, 87, 4, Foe.getCCSprite().getRotation());
 						}
 						Foe.getCCSprite().removeSelf();
 						_Foes.remove(j);
@@ -882,7 +1060,7 @@ public class FeiJi_Play extends CCColorLayer {
 						if (Foe.getCCSprite().getTag() == 2) {
 
 						} else {
-							ChageSpriteBack(Foe, true, _MiddleFoe_Path_2, 1); //添加被打效果 并下落
+							ChageSpriteBack(Foe, true, _MiddleFoe_Path_2, 1, Foe.getCCSprite().getRotation()); //添加被打效果 并下落
 							Foe.getCCSprite().removeSelf();
 							_Foes.remove(j);
 						}
@@ -893,7 +1071,7 @@ public class FeiJi_Play extends CCColorLayer {
 						if (Foe.getCCSprite().getTag() == 2) {
 
 						} else {
-							ChageSpriteBack(Foe, false, _MiddleFoe_Path, 1);
+							ChageSpriteBack(Foe, false, _MiddleFoe_Path, 1, Foe.getCCSprite().getRotation());
 							Foe.getCCSprite().removeSelf();
 							_Foes.remove(j);
 						}
@@ -958,11 +1136,24 @@ public class FeiJi_Play extends CCColorLayer {
 		BgMove.runAction(fs_actions);
 	}
 
+	/**
+	 * 移除子弹
+	 */
+ 	private void ReMoveAllShot(){
+		if (_Foes_Shots !=null && _Foes_Shots.size() > 0){
+			for (int j = 0; j < _Foes_Shots.size(); j++) {
+				CCSprite bigShot =  _Foes_Shots.get(j);
+				bigShot.removeSelf();
+			}
+			_Foes_Shots.clear();
+		}
+	}
 
 	/**
 	 *  移除所有飞机，包括动画
 	 */
 	private void ReMoveAll() {
+		ReMoveAllShot();
 		List<FeiJi_Sprite> _FoesAll = _Foes;
 		List<FeiJi_Sprite> _BigFoesAll = _BigFoes;
 		for (int j = 0; j < _FoesAll.size(); j++) {
@@ -972,11 +1163,11 @@ public class FeiJi_Play extends CCColorLayer {
 				if (Foe.getCCSprite().getTag() == 2) {
 					ChageScore(1000);
 					AddSpriteAnimal(Foe.getCCSprite().getPosition(), //添加敌机消失动画
-							_SmallFoe_Sequence_Path, 52, 52, 3);
+							_SmallFoe_Sequence_Path, 52, 52, 3, Foe.getCCSprite().getRotation());
 				} else {
 					ChageScore(6000);
 					AddSpriteAnimal(Foe.getCCSprite().getPosition(),
-							_MiddleFoe_Sequence_Path, 69, 87, 4);
+							_MiddleFoe_Sequence_Path, 69, 87, 4, Foe.getCCSprite().getRotation());
 				}
 				Foe.getCCSprite().removeSelf();
 			}
@@ -989,7 +1180,7 @@ public class FeiJi_Play extends CCColorLayer {
 				BigFoe.getCCSprite().removeSelf();
 				ChageScore(30000);
 				AddSpriteAnimal(BigFoe.getCCSprite().getPosition(),
-						_BigFoe_Sequence_Path, 164, 245, 6);
+						_BigFoe_Sequence_Path, 164, 245, 6, BigFoe.getCCSprite().getRotation());
 			}
 		}
 		_BigFoes.removeAll(_BigFoesAll);
@@ -1056,13 +1247,16 @@ public class FeiJi_Play extends CCColorLayer {
 	 * @param Cut 裁剪数
 	 */
 	private void AddSpriteAnimal(CGPoint touchRect, String Path, int CutW,
-								 int CutH, int Cut) {
+								 int CutH, int Cut, float rotation) {
 		CCSpriteSheet boomSheet = CCSpriteSheet.spriteSheet(Path);
+
+		//boomSheet.setRotation(0);
 
 		this.addChild(boomSheet);
 
 		CCSprite Sprite = CCSprite.sprite(boomSheet.getTexture(),
 				CGRect.make(0, 0, CutW, CutH));
+		Sprite.setRotation(rotation);// DONE: 2016/3/31 爆炸的时候旋转
 		boomSheet.addChild(Sprite);
 		Sprite.setPosition(touchRect.x, touchRect.y);
 		int frameCount = 0;
@@ -1188,11 +1382,12 @@ public class FeiJi_Play extends CCColorLayer {
 	 * @param i 飞机类型
 	 */
 	private void ChageSpriteBack(FeiJi_Sprite Foe, boolean Click, String Path,
-			int i) {
+			int i, float rotation) {
 		FeiJi_Sprite _FeiJi_Foe = new FeiJi_Sprite();
 		_FeiJi_Foe.setClicked_Or(Click);
 		_FeiJi_Foe.setLift(Foe.Life);
 		_FeiJi_Foe.setCCSprite(Path);
+		_FeiJi_Foe.getCCSprite().setRotation(rotation);
 		_FeiJi_Foe.setInitX(Foe.getInitX());
 		_FeiJi_Foe.setInitY(Foe.getCCSprite().getPosition().y);
 		float _sudu = (Foe.getInitY() + _FeiJi_Foe.getCCSprite()
@@ -1290,9 +1485,9 @@ public class FeiJi_Play extends CCColorLayer {
 						R.style.Dialog_Style);
 				_Dialog.setCancelable(false);
 				_Dialog.setCanceledOnTouchOutside(false);
-				_Dialog.setContentView(v);// ���ò���
+				_Dialog.setContentView(v);
 				Window window = _Dialog.getWindow();
-				window.setWindowAnimations(R.style.mystyle);  //��Ӷ���
+				window.setWindowAnimations(R.style.mystyle);
 				_Dialog.show();
 				
 				Button _Pause_TV = (Button) v
