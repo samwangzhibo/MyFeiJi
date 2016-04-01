@@ -98,7 +98,7 @@ public class FeiJi_Play extends CCColorLayer {
 	/**
 	 * 大飞机子弹速度（可调控）
 	 */
-	private float BigFoe_Shot_Du = 2.0f;
+	private float BigFoe_Shot_Du = 4.0f;
 	/**
 	 * 根据手指位置判断飞机是否可以移动
 	 */
@@ -318,12 +318,13 @@ public class FeiJi_Play extends CCColorLayer {
 				addChild(_FeiJi_Shot);
 
 				_Foes_Shots.add(_FeiJi_Shot);//添加子弹
-				/*	float[] a =  getShotToPosition(localX, localY, _FeiJi_Play.getPosition().x, _FeiJi_Play.getPosition().y, _WinSize.width, _WinSize.height);
+					float[] a =  getShotToPosition(localX, localY, _FeiJi_Play.getPosition().x, _FeiJi_Play.getPosition().y, _WinSize.width, _WinSize.height);
 					CCFiniteTimeAction fs_timeAction = CCMoveTo.action(BigFoe_Shot_Du, CGPoint
-							.ccp(a[0],a[1]));// CCMoveTo*/
+							.ccp(a[0],a[1]));// CCMoveTo
 
-				CCFiniteTimeAction fs_timeAction = CCMoveTo.action(BigFoe_Shot_Du, CGPoint
-						.ccp(_FeiJi_Play.getPosition().x, _FeiJi_Play.getPosition().y));// CCMoveTo
+				/*CCFiniteTimeAction fs_timeAction = CCMoveTo.action(BigFoe_Shot_Du, CGPoint
+						.ccp(_FeiJi_Play.getPosition().x, _FeiJi_Play.getPosition().y));// CCMoveTo*/
+
 				CCCallFuncN fs_Over = null;
 				fs_Over = CCCallFuncN.action(this, "Foes_Shot_Over");
 
@@ -356,16 +357,19 @@ public class FeiJi_Play extends CCColorLayer {
 		float[] a = new float[2];
 		float deltax = Math.abs(mplayx - localx);
 		float deltay = Math.abs(mplayy - localy);
+		float len = (float) Math.sqrt((mplayx - localx) * (mplayx - localx) + (mplayy - localy) * (mplayy - localy));
 		if (mplayx < localx){
-			a[0] = localx - (deltay / deltax) * windowx;
+			a[0] = -deltax * windowx / len + localx;
 		}else {
-			a[0] = localx + (deltay / deltax) * windowx;
+			a[0] = deltax * windowx / len + localx;
 		}
+
 		if (mplayy > localy) {
-			a[1] = localy + (deltay / deltax) * windowy; //斜率乘以长度
+			a[1] = deltay * windowy / len + localy;
 		}else {
-			a[1] = localy - (deltay / deltax) * windowy;
+			a[1] = -deltay * windowy / len + localy;
 		}
+
 		Log.e("wzb  ------ >","x  === "+a[0]+"    y ===   "+a[1]);
 		return a;
 	}
@@ -408,7 +412,6 @@ public class FeiJi_Play extends CCColorLayer {
 			CCCallFuncN fs_back = CCCallFuncN.action(this, "Red_Bomb_Back");
 			CCSequence fs_actions = CCSequence.actions(fs_timeAction, fs_back);
 			_Red_Blue_Down.runAction(fs_actions);
-			Log.e(TAG, "------- RedBlue开始下落");
 		}
 	}
 
@@ -495,11 +498,15 @@ public class FeiJi_Play extends CCColorLayer {
 			_FeiJi_Foe.setMax_Life(_Small_life);
 			_FeiJi_Foe.setCCSprite(_SmallFoe_Path);
 			FoeDown(_FeiJi_Foe, 2);
-			SmallFejiType(1);
+			selectRandomType();
 		}
 		_AllFoes.add(_FeiJi_Foe);
 	}
 
+	private void selectRandomType(){
+		Random random = new Random();
+		SmallFejiType(random.nextInt(2) + 1);
+	}
 	/**
 	 * 小飞机AI
 	 * @param type
@@ -508,6 +515,9 @@ public class FeiJi_Play extends CCColorLayer {
 		switch (type){
 			case 1:
 				this.schedule("smallFoeDown1",0.2f);
+				break;
+			case 2:
+				this.schedule("smallFoeDown2",0.2f);
 				break;
 			default:
 				break;
@@ -520,7 +530,6 @@ public class FeiJi_Play extends CCColorLayer {
 	 */
 	public void smallFoeDown1(float t) {
 		if (Small_Foe_Down1_Index != 4) {
-			Log.e("wzb ------ >","添加小飞机"+Small_Foe_Down1_Index);
 			// TODO: 2016/3/31 添加多架飞机
 			FeiJi_Sprite _FeiJi_Foe = new FeiJi_Sprite();
 			_FeiJi_Foe.setClicked_Or(false);
@@ -559,6 +568,65 @@ public class FeiJi_Play extends CCColorLayer {
 			Small_Foe_Down1_Index++;
 		} else {
 			unschedule("smallFoeDown1");
+			Small_Foe_Down1_Index = 1;
+			return;
+		}
+	}
+	private void smallFoeCommonDown(float fromx, float fromy,float tox, float toy, int rotationtype){
+		FeiJi_Sprite _FeiJi_Foe = new FeiJi_Sprite();
+		_FeiJi_Foe.setClicked_Or(false);
+		_FeiJi_Foe.setLift(_Small_life);
+		_FeiJi_Foe.setMax_Life(_Small_life);
+		_FeiJi_Foe.setCCSprite(_SmallFoe_Path);
+		_FeiJi_Foe.getCCSprite().setTag(2); //小飞机
+
+		int actualX = (int) (fromx +_FeiJi_Foe.getCCSprite().getContentSize().width / 2); //实际x位置
+
+		_FeiJi_Foe.setInitX(actualX);
+		_FeiJi_Foe.setInitDuration(2);
+		_FeiJi_Foe.setInitY(fromy); //飞机头部刚刚在外面
+		CCSprite _Feiji_Sprite = _FeiJi_Foe.getCCSprite();
+		_Feiji_Sprite.setPosition(
+				actualX, _WinSize.height * 2 / 3);
+		double a = Math.toDegrees(Math.atan (_WinSize.height / (3 * _WinSize.width)));
+		Log.e("wzb", a + " degrees");
+		switch (rotationtype){
+			case 1:
+				_Feiji_Sprite.setRotation((float) -(90 - a));
+				break;
+			case 2:
+				_Feiji_Sprite.setRotation((float) (90 - a));
+				break;
+			default:
+				break;
+		}
+
+		addChild(_Feiji_Sprite);
+
+		// TODO: 2016/3/17 增加飞机路径的AI
+
+		CCFiniteTimeAction fs_timeAction = CCMoveTo.action(2,
+				CGPoint.ccp(tox -_FeiJi_Foe.getCCSprite().getContentSize().width / 2, toy));//实践内移动，注意不是moveBy
+		CCCallFuncN fs_Over = null; //动画对象
+
+		fs_Over = CCCallFuncN.action(this, "Foe_Over");
+
+		CCSequence fs_actions = CCSequence.actions(fs_timeAction, fs_Over);//执行完动画，执行"BigFoe_Over"方法
+		_FeiJi_Foe.getCCSprite().runAction(fs_actions);
+
+		_AllFoes.add(_FeiJi_Foe);
+		_Foes.add(_FeiJi_Foe);
+	}
+	/**
+	 * 小飞机第一种飞行效果
+	 * @param t
+	 */
+	public void smallFoeDown2(float t) {
+		if (Small_Foe_Down1_Index != 4) {
+			smallFoeCommonDown(_WinSize.width, _WinSize.height * 2 /3, 0, _WinSize.height/3, 2);
+			Small_Foe_Down1_Index++;
+		} else {
+			unschedule("smallFoeDown2");
 			Small_Foe_Down1_Index = 1;
 			return;
 		}
@@ -683,7 +751,7 @@ public class FeiJi_Play extends CCColorLayer {
 		}
 
 		_FeiJi_Foe2.setInitX(actualX);
-		_FeiJi_Foe2.setInitDuration(actualDuration);
+		_FeiJi_Foe2.setInitDuration(FoeDown_Time);
 		_FeiJi_Foe2.setInitY(_FeiJi_Foe2.getCCSprite().getContentSize().height
 				/ 2.0f + _WinSize.height); //飞机头部刚刚在外面
 
