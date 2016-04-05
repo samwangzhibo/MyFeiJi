@@ -32,6 +32,7 @@ import org.cocos2d.nodes.CCLabel;
 import org.cocos2d.nodes.CCSprite;
 import org.cocos2d.nodes.CCSpriteFrame;
 import org.cocos2d.nodes.CCSpriteSheet;
+import org.cocos2d.opengl.CCGLSurfaceView;
 import org.cocos2d.types.CGPoint;
 import org.cocos2d.types.CGRect;
 import org.cocos2d.types.CGSize;
@@ -160,15 +161,26 @@ public class FeiJi_Play extends CCColorLayer {
 
 	protected FeiJi_Play(ccColor4B color) {
 		super(color);
-		Init();
+		CCDirector.sharedDirector().getActivity().runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				Init();
+			}
+			});
 	}
 
 	protected FeiJi_Play(ccColor4B color,boolean isgk) {
 		super(color);
 		this._IsGK = isgk;
-		Init();
+		CCDirector.sharedDirector().getActivity().runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				Init();
+			}
+		});
 	}
 	private void Init() {
+		Log.e("wzb","_feiji_play glview is activated"+CCDirector.sharedDirector().getOpenGLView().isActivated());
 		Is_Bg_Move = sharedPrefUtil.getBoolean("bgflow");
 		_Invincible = sharedPrefUtil.getBoolean("InvincibleST");
 
@@ -222,7 +234,7 @@ public class FeiJi_Play extends CCColorLayer {
 		}
 
 
-
+		// TODO: 2016/4/3 del
 		_FeiJi_Pause = CCSprite.sprite(_Pause_Path);
 		_FeiJi_Pause.setPosition(CGPoint.make(
 				_FeiJi_Pause.getContentSize().width / 2 + 1, _WinSize.height
@@ -243,6 +255,7 @@ public class FeiJi_Play extends CCColorLayer {
 			this.schedule("AddBigFoe", 0.2f); //大飞机精灵变化
 
 			this.schedule("AddBigShot", 2.5f); //大飞机发子弹
+			this.schedule("selectRandomType", 2.5f);
 
 		AddRedBomb();
 		showLife();
@@ -498,14 +511,23 @@ public class FeiJi_Play extends CCColorLayer {
 			_FeiJi_Foe.setMax_Life(_Small_life);
 			_FeiJi_Foe.setCCSprite(_SmallFoe_Path);
 			FoeDown(_FeiJi_Foe, 2);
-			selectRandomType();
 		}
 		_AllFoes.add(_FeiJi_Foe);
 	}
 
-	private void selectRandomType(){
-		Random random = new Random();
-		SmallFejiType(random.nextInt(2) + 1);
+	public void selectRandomType(float t){
+		if (isStart) {
+			Log.e("wzb","_feiji_play glview is activated"+CCDirector.sharedDirector().getOpenGLView().isActivated());
+			Random random = new Random();
+			int nowRandom = random.nextInt(20) + 1;
+			if (nowRandom ==1 || nowRandom == 2){
+				SmallFejiType(nowRandom + 2);
+			}else if (nowRandom >= 3 && nowRandom <= 6){
+				SmallFejiType(nowRandom % 2 +1);
+			}else {
+				return;
+			}
+		}
 	}
 	/**
 	 * 小飞机AI
@@ -518,6 +540,14 @@ public class FeiJi_Play extends CCColorLayer {
 				break;
 			case 2:
 				this.schedule("smallFoeDown2",0.2f);
+				break;
+			case 3:
+				this.schedule("foeUp1",0.2f);
+				break;
+			case 4:
+				this.schedule("foeUp2",0.2f);
+				break;
+			case 5:
 				break;
 			default:
 				break;
@@ -548,7 +578,6 @@ public class FeiJi_Play extends CCColorLayer {
 			_Feiji_Sprite.setPosition(
 					actualX, _WinSize.height * 2 / 3);
 			double a = Math.toDegrees(Math.atan (_WinSize.height / (3 * _WinSize.width)));
-			Log.e("wzb", a+" degrees");
 			_Feiji_Sprite.setRotation((float) -(90-a));
 			addChild(_Feiji_Sprite);
 
@@ -589,7 +618,6 @@ public class FeiJi_Play extends CCColorLayer {
 		_Feiji_Sprite.setPosition(
 				actualX, _WinSize.height * 2 / 3);
 		double a = Math.toDegrees(Math.atan (_WinSize.height / (3 * _WinSize.width)));
-		Log.e("wzb", a + " degrees");
 		switch (rotationtype){
 			case 1:
 				_Feiji_Sprite.setRotation((float) -(90 - a));
@@ -623,7 +651,7 @@ public class FeiJi_Play extends CCColorLayer {
 	 */
 	public void smallFoeDown2(float t) {
 		if (Small_Foe_Down1_Index != 4) {
-			smallFoeCommonDown(_WinSize.width, _WinSize.height * 2 /3, 0, _WinSize.height/3, 2);
+			smallFoeCommonDown(_WinSize.width, _WinSize.height * 2 / 3, 0, _WinSize.height / 3, 2);
 			Small_Foe_Down1_Index++;
 		} else {
 			unschedule("smallFoeDown2");
@@ -631,6 +659,79 @@ public class FeiJi_Play extends CCColorLayer {
 			return;
 		}
 	}
+	/**
+	 * 飞机往上飞效果
+	 * @param t
+	 */
+	public void foeUp1(float t) {
+		if (Small_Foe_Down1_Index != 4) {
+			foeCommonUp(_WinSize.width / 3, 0, _WinSize.width * 2 / 3, _WinSize.height, 2);
+			Small_Foe_Down1_Index++;
+		} else {
+			unschedule("foeUp1");
+			Small_Foe_Down1_Index = 1;
+			return;
+		}
+	}
+
+	/**
+	 * 飞机往上飞效果
+	 * @param t
+	 */
+	public void foeUp2(float t) {
+		if (Small_Foe_Down1_Index != 4) {
+			foeCommonUp(_WinSize.width * 2 / 3, 0, _WinSize.width / 3, _WinSize.height, 1);
+			Small_Foe_Down1_Index++;
+		} else {
+			unschedule("foeUp2");
+			Small_Foe_Down1_Index = 1;
+			return;
+		}
+	}
+
+	private void foeCommonUp(float fromx, float fromy,float tox, float toy, int rotationtype) {
+		FeiJi_Sprite _FeiJi_Foe = new FeiJi_Sprite();
+		_FeiJi_Foe.setClicked_Or(false);
+		_FeiJi_Foe.setLift(_Small_life);
+		_FeiJi_Foe.setMax_Life(_Small_life);
+		_FeiJi_Foe.setCCSprite(_SmallFoe_Path);
+		_FeiJi_Foe.getCCSprite().setTag(2); //小飞机
+
+		int actualY = (int) (fromy - _FeiJi_Foe.getCCSprite().getContentSize().height / 2); //实际x位置
+
+		_FeiJi_Foe.setInitX(fromx);
+		_FeiJi_Foe.setInitDuration(2);
+		_FeiJi_Foe.setInitY(actualY); //飞机头部刚刚在外面
+		CCSprite _Feiji_Sprite = _FeiJi_Foe.getCCSprite();
+		_Feiji_Sprite.setPosition(
+				fromx,actualY);
+		double a = Math.toDegrees(Math.atan (_WinSize.height * 3 / (_WinSize.width)));
+		switch (rotationtype){
+			case 1:
+				_Feiji_Sprite.setRotation((float) (180 -(90 - a)));
+				break;
+			case 2:
+				_Feiji_Sprite.setRotation((float) (180 + 90 - a));
+				break;
+			default:
+				break;
+		}
+
+		addChild(_Feiji_Sprite);
+
+		CCFiniteTimeAction fs_timeAction = CCMoveTo.action(2,
+				CGPoint.ccp(tox, toy + _FeiJi_Foe.getCCSprite().getContentSize().height / 2));//实践内移动，注意不是moveBy
+		CCCallFuncN fs_Over = null; //动画对象
+
+		fs_Over = CCCallFuncN.action(this, "Foe_Over");
+
+		CCSequence fs_actions = CCSequence.actions(fs_timeAction, fs_Over);//执行完动画，执行"BigFoe_Over"方法
+		_FeiJi_Foe.getCCSprite().runAction(fs_actions);
+
+		_AllFoes.add(_FeiJi_Foe);
+		_Foes.add(_FeiJi_Foe);
+	}
+
 	/**
 	 * 让主飞机背景一直变化
 	 */
@@ -941,6 +1042,7 @@ public class FeiJi_Play extends CCColorLayer {
 	 * 控制飞机的碰撞
 	 */
 	private void PlayOver() {
+		if (_FeiJi_Play == null) return;
 		CGRect Rect = _FeiJi_Play.getBoundingBox();
 		CGRect Rect3 = CGRect.make(Rect.origin.x + (Rect.size.width / 3.2f),
 				Rect.origin.y, (Rect.size.width / 3.2f), Rect.size.height);
@@ -1049,6 +1151,7 @@ public class FeiJi_Play extends CCColorLayer {
 		this.unschedule("AddPlay");
 		this.unschedule("Detection");
 		this.unschedule("AddRedBlueDown");
+		this.unschedule("selectRandomType");
 	}
 
 
@@ -1167,9 +1270,7 @@ public class FeiJi_Play extends CCColorLayer {
 				}
 			}
 		}
-
 			PlayOver();
-
 	}
 	private void BgMove(CCSprite _FeiJi_Back){
 		if (_FeiJi_Back != null){

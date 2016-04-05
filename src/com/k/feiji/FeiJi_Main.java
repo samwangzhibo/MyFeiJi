@@ -1,9 +1,17 @@
 package com.k.feiji;
 
+import android.app.ActivityManager;
+import android.content.Context;
+import android.content.pm.ConfigurationInfo;
+import android.graphics.PixelFormat;
+import android.opengl.GLSurfaceView;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
+import android.widget.Toast;
 
 import com.baidu.mobstat.StatService;
+import com.k.feiji.util.MyCCGLSurfaceView;
 import com.k.feiji.util.SharedPrefUtil;
 import com.k.feiji.util.SoundPlayer;
 
@@ -13,16 +21,33 @@ import org.cocos2d.nodes.CCTextureCache;
 import org.cocos2d.opengl.CCGLSurfaceView;
 import org.cocos2d.types.ccColor4B;
 
-public class FeiJi_Main extends FeiJi_BaseAc {
+import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.opengles.GL10;
 
-	private CCGLSurfaceView _FeiJi_Surface;
+public class FeiJi_Main extends FeiJi_BaseAc{
+
+	private MyCCGLSurfaceView _FeiJi_Surface;
 	private CCScene _FeiJi_Scene;
 	SoundPlayer soundPlayer;
 	SharedPrefUtil sharedPrefUtil = SharedPrefUtil.getInstance();
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		_FeiJi_Surface = new CCGLSurfaceView(this);
+		_FeiJi_Surface = new MyCCGLSurfaceView(this);
+		// TODO: 2016/4/3 del
+		//_FeiJi_Surface.setBackgroundResource(R.drawable.feiji_background);
+		_FeiJi_Surface.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
+		_FeiJi_Surface.getHolder().setFormat(PixelFormat.TRANSPARENT);
+		_FeiJi_Surface.setZOrderOnTop(true);//这句不能少
+
+		//_FeiJi_Surface.setEGLContextClientVersion(2);
+
+		Log.e("wzb", _FeiJi_Surface.getContentDescription()+"");
+
+		ActivityManager am =(ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+		ConfigurationInfo info = am.getDeviceConfigurationInfo();
+		Log.e("wzb", "gl版本" + info.getGlEsVersion());
+
 		setContentView(_FeiJi_Surface);
 
 		soundPlayer = SoundPlayer.getInstance();
@@ -50,16 +75,17 @@ public class FeiJi_Main extends FeiJi_BaseAc {
 	@Override
 	protected void onResume() {
 		super.onResume();
+		Log.e("wzb","_FeiJi_Surface is isActivated:"+_FeiJi_Surface.isActivated());
 		if (!FeiJi_Play.getIsClickPause()){
 			CCDirector.sharedDirector().resume();
 		}
 		StatService.onResume(this);
 		soundPlayer.startMusic();
+
 	}
 
 	@Override
 	protected void onStart() {
-		super.onStart();
 		super.onStart();
 		// cocos2d里习惯以左下角作为原点,时间单位是秒
 		CCDirector.sharedDirector().attachInView(_FeiJi_Surface);// 把cocos2d绑定在GLSurfaceView这个载体上
@@ -78,7 +104,7 @@ public class FeiJi_Main extends FeiJi_BaseAc {
 		}
 		FeiJi_Play _Layer1 = new FeiJi_Play(ccColor4B.ccc4(255, 255, 255, 255),iskg);
 		//FeiJi_Play2 _Layer = new FeiJi_Play2(ccColor4B.ccc4(255, 255, 255, 255));
-//		_Layer.GetContext(FeiJi_Main.this);
+		//_Layer1.GetContext(FeiJi_Main.this);
 		//_FeiJi_Scene.addChild(_Layer);
 		_FeiJi_Scene.addChild(_Layer1);
 		
@@ -94,12 +120,12 @@ public class FeiJi_Main extends FeiJi_BaseAc {
 	}
 	
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		 
-        if (keyCode == KeyEvent.KEYCODE_BACK
+
+       /* if (keyCode == KeyEvent.KEYCODE_BACK
                  && event.getRepeatCount() == 0) {
-        	
              return true;
-         }
+         }*/
+		Toast.makeText(this,"back", Toast.LENGTH_LONG).show();
          return super.onKeyDown(keyCode, event);
      }
 }
