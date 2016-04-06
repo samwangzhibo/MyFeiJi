@@ -16,6 +16,7 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.k.feiji.myccanim.MyCCBezierTo;
 import com.k.feiji.util.SharedPrefUtil;
 import com.k.feiji.util.SoundPlayer;
 
@@ -24,6 +25,7 @@ import org.cocos2d.actions.instant.CCCallFuncN;
 import org.cocos2d.actions.interval.CCAnimate;
 import org.cocos2d.actions.interval.CCMoveBy;
 import org.cocos2d.actions.interval.CCMoveTo;
+import org.cocos2d.actions.interval.CCRotateBy;
 import org.cocos2d.actions.interval.CCSequence;
 import org.cocos2d.layers.CCColorLayer;
 import org.cocos2d.nodes.CCAnimation;
@@ -32,7 +34,7 @@ import org.cocos2d.nodes.CCLabel;
 import org.cocos2d.nodes.CCSprite;
 import org.cocos2d.nodes.CCSpriteFrame;
 import org.cocos2d.nodes.CCSpriteSheet;
-import org.cocos2d.opengl.CCGLSurfaceView;
+import org.cocos2d.types.CCBezierConfig;
 import org.cocos2d.types.CGPoint;
 import org.cocos2d.types.CGRect;
 import org.cocos2d.types.CGSize;
@@ -104,6 +106,10 @@ public class FeiJi_Play extends CCColorLayer {
 	 * 根据手指位置判断飞机是否可以移动
 	 */
 	private boolean _Can_Move = false;
+	/**
+	 * 飞机队列的时间
+	 */
+	private int My_CCBezierTo_Time = 2;
 	private CGSize _WinSize;
 	private int _Play_Image_Chage = 1;// 飞机图片判断
 	private int _BigFoe_Image_Chage = 1;// 大型飞机图片判断
@@ -244,9 +250,9 @@ public class FeiJi_Play extends CCColorLayer {
 		feiji_Guanka = Feiji_Guanka.getInstance();
 		AddScore(); //第一次默认加载分数
 
-		this.schedule("welLabel", 1f);
+			this.schedule("welLabel", 1f);
 
-			this.schedule("GameFoes", 2f);// 0.5秒执行一次 添加敌机 包括动画
+			this.schedule("GameFoes", 1f);// 0.5秒执行一次 添加敌机 包括动画
 			this.schedule("GameShot", 0.2f);//0.2秒发射一次
 			GamePlay();//添加飞机
 			this.schedule("AddPlay", 0.2f); //主飞机精灵变化
@@ -382,8 +388,6 @@ public class FeiJi_Play extends CCColorLayer {
 		}else {
 			a[1] = -deltay * windowy / len + localy;
 		}
-
-		Log.e("wzb  ------ >","x  === "+a[0]+"    y ===   "+a[1]);
 		return a;
 	}
 	/**
@@ -524,6 +528,8 @@ public class FeiJi_Play extends CCColorLayer {
 				SmallFejiType(nowRandom + 2);
 			}else if (nowRandom >= 3 && nowRandom <= 6){
 				SmallFejiType(nowRandom % 2 +1);
+			}else if (nowRandom == 7 || nowRandom == 8){
+				SmallFejiType(nowRandom - 2);
 			}else {
 				return;
 			}
@@ -548,6 +554,10 @@ public class FeiJi_Play extends CCColorLayer {
 				this.schedule("foeUp2",0.2f);
 				break;
 			case 5:
+				this.schedule("foeBezier",0.2f);
+				break;
+			case 6:
+				this.schedule("foeBezier2",0.2f);
 				break;
 			default:
 				break;
@@ -644,6 +654,129 @@ public class FeiJi_Play extends CCColorLayer {
 
 		_AllFoes.add(_FeiJi_Foe);
 		_Foes.add(_FeiJi_Foe);
+	}
+	private void makeBezier(CGPoint p1, CGPoint p2){
+		FeiJi_Sprite _FeiJi_Foe = new FeiJi_Sprite();
+		_FeiJi_Foe.setClicked_Or(false);
+			/*_FeiJi_Foe.setLift(_Middle_Life);
+			_FeiJi_Foe.setMax_Life(_Middle_Life);
+			_FeiJi_Foe.setCCSprite(_MiddleFoe_Path);
+			_FeiJi_Foe.getCCSprite().setTag(1); //中飞机*/
+
+		_FeiJi_Foe.setLift(_Small_life);
+		_FeiJi_Foe.setMax_Life(_Small_life);
+		_FeiJi_Foe.setCCSprite(_SmallFoe_Path);
+		_FeiJi_Foe.getCCSprite().setTag(2); //小飞机
+
+		int actualX = (int) (_WinSize.width * 3 / 4); //实际x位置
+
+		_FeiJi_Foe.setInitX(actualX);
+		_FeiJi_Foe.setInitDuration(2);
+		_FeiJi_Foe.setInitY(_WinSize.height + _FeiJi_Foe.getCCSprite().getContentSize().height / 2);
+		CCSprite _Feiji_Sprite = _FeiJi_Foe.getCCSprite();
+		_Feiji_Sprite.setPosition(
+				actualX, _WinSize.height + _FeiJi_Foe.getCCSprite().getContentSize().height / 2);
+		addChild(_Feiji_Sprite);
+
+		//double a = Math.toDegrees(Math.atan (_WinSize.height / (3 * _WinSize.width)));
+		//_Feiji_Sprite.setRotation((float) -(90-a));
+
+		CCBezierConfig ccBezierConfig = new CCBezierConfig();
+		ccBezierConfig.controlPoint_1 = p1;
+		ccBezierConfig.controlPoint_2 = p2;
+		ccBezierConfig.endPosition = CGPoint.ccp(0 - _Feiji_Sprite.getContentSize().width / 2,0);
+		//0 - _FeiJi_Foe.getCCSprite().getContentSize().width / 2
+
+		CCFiniteTimeAction fs_timeAction = MyCCBezierTo.action(My_CCBezierTo_Time, ccBezierConfig);
+		CCFiniteTimeAction fs_timeAction3 = fs_timeAction.reverse();
+		CCFiniteTimeAction fs_timeAction2 = CCRotateBy.action(2, 720);
+		CCCallFuncN fs_Over = null; //动画对象
+
+
+		fs_Over = CCCallFuncN.action(this, "Foe_Over");
+
+		//CCSpawn ccSpawn = CCSpawn.actions(fs_timeAction, fs_Over);
+		CCSequence fs_actions = CCSequence.actions(fs_timeAction, fs_Over);
+		_FeiJi_Foe.getCCSprite().runAction(fs_actions);
+
+		_AllFoes.add(_FeiJi_Foe);
+		_Foes.add(_FeiJi_Foe);
+	}
+	/**
+	 * 飞机队列的贝塞尔曲线路径1
+	 * @param t
+	 */
+	public void foeBezier(float t) {
+		if (Small_Foe_Down1_Index != 4) {
+
+			makeBezier(CGPoint.ccp(_WinSize.width * 3 / 4, _WinSize.height / 2), CGPoint.ccp(_WinSize.width * 1 / 4, _WinSize.height / 2));
+
+			Small_Foe_Down1_Index++;
+		} else {
+			unschedule("foeBezier");
+			Small_Foe_Down1_Index = 1;
+			return;
+		}
+	}
+	/**
+	 * 飞机队列的贝塞尔曲线路径2
+	 * @param t
+	 */
+	public void foeBezier2(float t) {
+		if (Small_Foe_Down1_Index != 4) {
+
+			FeiJi_Sprite _FeiJi_Foe = new FeiJi_Sprite();
+			_FeiJi_Foe.setClicked_Or(false);
+			_FeiJi_Foe.setLift(_Middle_Life);
+			_FeiJi_Foe.setMax_Life(_Middle_Life);
+			_FeiJi_Foe.setCCSprite(_MiddleFoe_Path);
+			_FeiJi_Foe.getCCSprite().setTag(1); //中飞机
+
+		/*	_FeiJi_Foe.setLift(_Small_life);
+			_FeiJi_Foe.setMax_Life(_Small_life);
+			_FeiJi_Foe.setCCSprite(_SmallFoe_Path);
+			_FeiJi_Foe.getCCSprite().setTag(2); //小飞机*/
+
+			int actualX = (int) (_WinSize.width * 3 / 4); //实际x位置
+
+			_FeiJi_Foe.setInitX(actualX);
+			_FeiJi_Foe.setInitDuration(2);
+			_FeiJi_Foe.setInitY(_WinSize.height + _FeiJi_Foe.getCCSprite().getContentSize().height / 2);
+			CCSprite _Feiji_Sprite = _FeiJi_Foe.getCCSprite();
+			_Feiji_Sprite.setPosition(
+					actualX, _WinSize.height + _FeiJi_Foe.getCCSprite().getContentSize().height / 2);
+			addChild(_Feiji_Sprite);
+
+			//double a = Math.toDegrees(Math.atan (_WinSize.height / (3 * _WinSize.width)));
+			//_Feiji_Sprite.setRotation((float) -(90-a));
+
+			CCBezierConfig ccBezierConfig = new CCBezierConfig();
+			ccBezierConfig.controlPoint_1 = CGPoint.ccp(_WinSize.width * 3 /4, _WinSize.width / 4);
+			ccBezierConfig.controlPoint_2 = CGPoint.ccp(_WinSize.width / 4, _WinSize.width / 4);
+			ccBezierConfig.endPosition = CGPoint.ccp(0 - _Feiji_Sprite.getContentSize().width / 2,_WinSize.height * 3 / 4);
+			//0 - _FeiJi_Foe.getCCSprite().getContentSize().width / 2
+
+			CCFiniteTimeAction fs_timeAction = MyCCBezierTo.action(4, ccBezierConfig);
+			CCFiniteTimeAction fs_timeAction3 = fs_timeAction.reverse();
+			CCFiniteTimeAction fs_timeAction2 = CCRotateBy.action(2, 720);
+			CCCallFuncN fs_Over = null; //动画对象
+
+
+			fs_Over = CCCallFuncN.action(this, "Foe_Over");
+
+			//CCSpawn ccSpawn = CCSpawn.actions(fs_timeAction, fs_Over);
+			CCSequence fs_actions = CCSequence.actions(fs_timeAction, fs_Over);
+			_FeiJi_Foe.getCCSprite().runAction(fs_actions);
+
+			_AllFoes.add(_FeiJi_Foe);
+			_Foes.add(_FeiJi_Foe);
+
+			Small_Foe_Down1_Index++;
+		} else {
+			unschedule("foeBezier2");
+			Small_Foe_Down1_Index = 1;
+			return;
+		}
 	}
 	/**
 	 * 小飞机第一种飞行效果
@@ -1231,9 +1364,11 @@ public class FeiJi_Play extends CCColorLayer {
 						if (Foe.getCCSprite().getTag() == 2) {
 
 						} else {
-							ChageSpriteBack(Foe, true, _MiddleFoe_Path_2, 1, Foe.getCCSprite().getRotation()); //添加被打效果 并下落
-							Foe.getCCSprite().removeSelf();
-							_Foes.remove(j);
+							if (Foe.getCCSprite().getRotation() == 0) {
+								ChageSpriteBack(Foe, true, _MiddleFoe_Path_2, 1, Foe.getCCSprite().getRotation()); //添加被打效果 并下落
+								Foe.getCCSprite().removeSelf();
+								_Foes.remove(j);
+							}
 						}
 					}
 				} else {

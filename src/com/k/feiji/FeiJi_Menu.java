@@ -4,12 +4,17 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.AssetManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.ViewPager;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -18,6 +23,13 @@ import com.k.feiji.fragment.AbourtFragment;
 import com.k.feiji.fragment.SettingFragment;
 import com.k.feiji.util.SharedPrefUtil;
 import com.k.feiji.util.SoundPlayer;
+import com.k.feiji.util.ZoomOutPageTransformer;
+import com.k.feiji.view.bgDialog;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 public class FeiJi_Menu extends FeiJi_BaseAc implements OnClickListener{
 
@@ -25,6 +37,8 @@ public class FeiJi_Menu extends FeiJi_BaseAc implements OnClickListener{
 			_FeiJi_Button_Setting,_FeiJi_Button_Guanka,_FeiJi_Button_Abourt;
 	SoundPlayer soundPlayer;
 	SharedPrefUtil sharedPrefUtil = SharedPrefUtil.getInstance();
+	bgDialog.DemoCollectionPagerAdapter adapter;
+	List<ImageView> datas = new ArrayList<>();
 	/**
 	 * 容器
 	 */
@@ -169,6 +183,35 @@ public class FeiJi_Menu extends FeiJi_BaseAc implements OnClickListener{
 								v3.setText(getString(R.string.setting_Invincible_off));
 								sharedPrefUtil.putBoolean("InvincibleST", false);
 							}
+							break;
+						case R.id.setting_select_bg:
+							bgDialog myBgDialog = bgDialog.createDialogWithContentView(FeiJi_Menu.this);
+							View contentview = myBgDialog.getContentView();
+							ViewPager myviewpager = (ViewPager) contentview.findViewById(R.id.myviewpager);
+							if (datas.size() != 4) {
+								AssetManager assetManager = getAssets();
+								for (int i = 0; i < 4; i++) {
+									try {
+										InputStream is;
+										if (i == 3) {
+											is = assetManager.open("images/feiji_background.png");
+										} else {
+											is = assetManager.open("images/map_bg" + i + ".png");
+										}
+										Bitmap a = BitmapFactory.decodeStream(is);
+										ImageView im = new ImageView(FeiJi_Menu.this);
+										im.setImageBitmap(a);
+										datas.add(im);
+									} catch (IOException e) {
+										e.printStackTrace();
+									}
+								}
+								adapter = new bgDialog.DemoCollectionPagerAdapter(datas);
+							}
+							myviewpager.setAdapter(adapter);
+							//viewpager添加切换效果
+							myviewpager.setPageTransformer(true, new ZoomOutPageTransformer());
+							myBgDialog.show();
 							break;
 				}
 				}

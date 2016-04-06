@@ -26,7 +26,7 @@
 
     <string name="setting_Invincible_off">无敌模式 off</string>
     <string name="setting_Invincible_on">无敌模式 on</string>
-
+    <string name="setting_select_bg">选择背景</string>
 
     <color name="black">#ff000000</color>
     <color name="gray">#7B797B</color>

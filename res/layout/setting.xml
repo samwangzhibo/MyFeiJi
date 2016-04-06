@@ -41,6 +41,11 @@
         android:text="@string/setting_Invincible_off"
         android:layout_gravity="center_horizontal" />
     <Button
+        android:id="@+id/setting_select_bg"
+        style="@style/Setting_Style"
+        android:text="@string/setting_select_bg"
+        android:layout_gravity="center_horizontal" />
+    <Button
         android:id="@+id/setting_music_style"
         style="@style/Setting_Style"
         android:text="@string/setting_music_style"
