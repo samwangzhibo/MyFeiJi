@@ -1,8 +1,8 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <style name="AppBaseTheme" parent="android:Theme.Light"></style>
+    <style name="AppBaseTheme" parent="android:Theme.NoTitleBar"></style>
 
-    <style name="AppTheme" parent="AppBaseTheme"></style>
+    <style name="AppTheme" parent="android:Theme.Light"></style>
 
     <style name="BackGround">
         <item name="android:background">@drawable/feiji_background</item>
@@ -15,6 +15,7 @@
         <item name="android:gravity">center</item>
         <item name="android:textColor">@color/black</item>
         <item name="android:textSize">@dimen/button_text</item>
+        <item name="android:paddingTop">10dp</item>
     </style>
 
     <style name="Button_Style">
@@ -43,14 +44,22 @@
         <!-- 模糊 -->
     </style>
 
-    <style name="GKDialogAnimStyle" parent="android:Animation">
+    <style name="GKDialogAnimStyle" parent="@android:style/Animation.Dialog">
         <item name="android:windowExitAnimation">@anim/gkdialog_exit_anim</item>
     </style>
 
   	<style name="mystyle" parent="android:Animation">
-  	    <item name="@android:windowEnterAnimation">@anim/dialog_enter</item> 
-        <item name="@android:windowExitAnimation">@anim/dialog_exit</item>    
-    </style>  
+  	    <item name="@android:windowEnterAnimation">@anim/dialog_enter12</item>
+        <item name="@android:windowExitAnimation">@anim/dialog_exit12</item>
+    </style>
 
+    <style name="MyDialogStyle" parent="@android:style/Theme.Dialog">
+        <item name="android:windowAnimationStyle">@style/MyDialogAnimation</item>
+    </style>
+
+    <style name="MyDialogAnimation" parent="android:Animation.Dialog">
+        <item name="android:windowEnterAnimation">@anim/dialog_enter12</item>
+        <item name="android:windowExitAnimation">@anim/dialog_exit12</item>
+    </style>
 
 </resources>

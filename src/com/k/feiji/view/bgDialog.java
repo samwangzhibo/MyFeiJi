@@ -22,7 +22,7 @@ import java.util.List;
  */
 public class bgDialog extends Dialog{
     private View contentView;
-
+    private CallBack callBack;
     /**
      * 使用contentView新建一个Dialog，这个dialog是可通过点击外部区域cancel的，而且显示在底部
      */
@@ -35,6 +35,7 @@ public class bgDialog extends Dialog{
         dialog.setCancelable(true);
 
         Window window = dialog.getWindow();
+        window.setWindowAnimations(R.style.MyDialogAnimation);
         WindowManager.LayoutParams wlp = window.getAttributes();
         wlp.gravity = Gravity.CENTER;
         wlp.width = WindowManager.LayoutParams.WRAP_CONTENT;
@@ -66,6 +67,11 @@ public class bgDialog extends Dialog{
         }
 
         @Override
+        public float getPageWidth(int position) {
+            return 0.8f;
+        }
+
+        @Override
         public Object instantiateItem(ViewGroup container, int position) {
             container.addView(imageViews.get(position));
             return imageViews.get(position);
@@ -81,7 +87,7 @@ public class bgDialog extends Dialog{
 
     @Override
     public void show() {
-        contentView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+       /* contentView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             @Override
             public boolean onPreDraw() {
                 contentView.getViewTreeObserver().removeOnPreDrawListener(this);
@@ -92,13 +98,13 @@ public class bgDialog extends Dialog{
                 translateAnimation.start();
                 return false;
             }
-        });
+        });*/
         super.show();
     }
 
     @Override
     public void dismiss() {
-        try {
+       /* try {
             TranslateAnimation translateAnimation =new TranslateAnimation(0,1,0,0);
             translateAnimation.setDuration(2000);
             contentView.setAnimation(translateAnimation);
@@ -106,7 +112,9 @@ public class bgDialog extends Dialog{
             bgDialog.super.dismiss();
         } catch (Exception e) {
             e.printStackTrace();
-        }
+        }*/
+        bgDialog.super.dismiss();
+        if (callBack != null) callBack.callback();
     }
 
     public void dismissImmediately() {
@@ -118,5 +126,10 @@ public class bgDialog extends Dialog{
         super.setContentView(view);
         this.contentView = view;
     }
-
+    public interface CallBack{
+         void callback();
+    }
+    public void setCallBack(CallBack callBack){
+        this.callBack = callBack;
+    }
 }

@@ -185,7 +185,17 @@ public class FeiJi_Menu extends FeiJi_BaseAc implements OnClickListener{
 							}
 							break;
 						case R.id.setting_select_bg:
+							if (!settFragment.isHidden())
+							getSupportFragmentManager().beginTransaction().hide(settFragment).commit();
+
 							bgDialog myBgDialog = bgDialog.createDialogWithContentView(FeiJi_Menu.this);
+							myBgDialog.setCallBack(new bgDialog.CallBack() {
+								@Override
+								public void callback() {
+									if (settFragment.isHidden())
+										getSupportFragmentManager().beginTransaction().show(settFragment).commit();
+								}
+							});
 							View contentview = myBgDialog.getContentView();
 							ViewPager myviewpager = (ViewPager) contentview.findViewById(R.id.myviewpager);
 							if (datas.size() != 4) {

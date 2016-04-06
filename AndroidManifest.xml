@@ -27,7 +27,8 @@
         android:allowBackup="true"
         android:icon="@drawable/logo"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:theme="@android:style/Theme.NoTitleBar"
+        >
         
         <!-- 以下是百度统计 -->
         	<!-- 您从百度网站获取的APP KEY -->
