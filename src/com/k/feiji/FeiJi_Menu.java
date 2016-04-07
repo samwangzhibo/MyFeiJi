@@ -35,6 +35,8 @@ public class FeiJi_Menu extends FeiJi_BaseAc implements OnClickListener{
 
 	private Button _FeiJi_Button_New, _FeiJi_Button_Score,
 			_FeiJi_Button_Setting,_FeiJi_Button_Guanka,_FeiJi_Button_Abourt;
+	private View contentview;
+	private ViewPager myviewpager;
 	SoundPlayer soundPlayer;
 	SharedPrefUtil sharedPrefUtil = SharedPrefUtil.getInstance();
 	bgDialog.DemoCollectionPagerAdapter adapter;
@@ -194,11 +196,14 @@ public class FeiJi_Menu extends FeiJi_BaseAc implements OnClickListener{
 								public void callback() {
 									if (settFragment.isHidden())
 										getSupportFragmentManager().beginTransaction().show(settFragment).commit();
+										sharedPrefUtil.putBgMusic("bg_im",myviewpager.getCurrentItem());
+										MakeToast(myviewpager.getCurrentItem());
+										datas.clear();
 								}
 							});
-							View contentview = myBgDialog.getContentView();
-							ViewPager myviewpager = (ViewPager) contentview.findViewById(R.id.myviewpager);
-							if (datas.size() != 4) {
+							contentview = myBgDialog.getContentView();
+							myviewpager = (ViewPager) contentview.findViewById(R.id.myviewpager);
+							//if (datas.size() != 4) {
 								AssetManager assetManager = getAssets();
 								for (int i = 0; i < 4; i++) {
 									try {
@@ -217,10 +222,12 @@ public class FeiJi_Menu extends FeiJi_BaseAc implements OnClickListener{
 									}
 								}
 								adapter = new bgDialog.DemoCollectionPagerAdapter(datas);
-							}
+							//}
 							myviewpager.setAdapter(adapter);
 							//viewpager添加切换效果
 							myviewpager.setPageTransformer(true, new ZoomOutPageTransformer());
+							int initIndex = sharedPrefUtil.getBgIm("bg_im");
+							myviewpager.setCurrentItem(initIndex);
 							myBgDialog.show();
 							break;
 				}
@@ -242,6 +249,26 @@ public class FeiJi_Menu extends FeiJi_BaseAc implements OnClickListener{
 			break;
 	}
 }
+
+	private void MakeToast(int currentItem) {
+		String myTheme = "";
+		switch (currentItem){
+			case 0:
+				myTheme = "死亡隧道";
+				break;
+			case 1:
+				myTheme = "蓝色海港";
+				break;
+			case 2:
+				myTheme = "草原上空";
+				break;
+			case 3:
+				myTheme = "经典战场";
+				break;
+		}
+		Toast toast = Toast.makeText(this, "当前主题:" + myTheme, Toast.LENGTH_SHORT);
+		toast.show();
+	}
 
 	/**
 	 * 展示菜单

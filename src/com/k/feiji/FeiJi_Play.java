@@ -68,10 +68,10 @@ public class FeiJi_Play extends CCColorLayer {
 	private CGPoint _Touch_Location;
 
 	private String _Font_Path = "Cookies.ttf";
-	private String _FeiJi_Back_Path1 = "images/feiji_background.png";
-	private String _FeiJi_Back_Path2 = "images/map_bg0.png";
-	private String _FeiJi_Back_Path3 = "images/map_bg1.png";
-	private String _FeiJi_Back_Path4 = "images/map_bg2.png";
+	private String _FeiJi_Back_Path3 = "images/feiji_background.png";
+	private String _FeiJi_Back_Path0 = "images/map_bg0.png";
+	private String _FeiJi_Back_Path1 = "images/map_bg1.png";
+	private String _FeiJi_Back_Path2 = "images/map_bg2.png";
 	private String _FeiJi_Actual_Back_Path;
 
 	private String _MiddleFoe_Path_2 = "images/middlefoe_2.png";
@@ -195,19 +195,20 @@ public class FeiJi_Play extends CCColorLayer {
 		_WinSize = CCDirector.sharedDirector().displaySize();//获取屏幕大小
 		setIsTouchEnabled(false);
 
-		int a = new Random().nextInt(4)+1;
+		int a = sharedPrefUtil.getBgIm("bg_im");
+		Log.e("wzb","a ------ > "+ a);
 		switch (a){
+			case 0:
+				_FeiJi_Actual_Back_Path = _FeiJi_Back_Path0;
+				break;
 			case 1:
 				_FeiJi_Actual_Back_Path = _FeiJi_Back_Path1;
 				break;
 			case 2:
-				_FeiJi_Actual_Back_Path = _FeiJi_Back_Path1;
+				_FeiJi_Actual_Back_Path = _FeiJi_Back_Path2;
 				break;
 			case 3:
-				_FeiJi_Actual_Back_Path = _FeiJi_Back_Path1;
-				break;
-			case 4:
-				_FeiJi_Actual_Back_Path = _FeiJi_Back_Path1;
+				_FeiJi_Actual_Back_Path = _FeiJi_Back_Path3;
 				break;
 		}
 

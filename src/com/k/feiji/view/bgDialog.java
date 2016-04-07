@@ -7,10 +7,8 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 
 import com.k.feiji.R;
@@ -62,8 +60,8 @@ public class bgDialog extends Dialog{
 
         @Override
         public void destroyItem(ViewGroup container, int position, Object object) {
-            Log.e("wzb","destroyItem");
-            container.removeView(imageViews.get(position));
+            Log.e("wzb","destroyItem"+position);
+            container.removeView((View) object);
         }
 
         @Override
@@ -73,6 +71,7 @@ public class bgDialog extends Dialog{
 
         @Override
         public Object instantiateItem(ViewGroup container, int position) {
+            Log.e("wzb","instantiateItem"+position);
             container.addView(imageViews.get(position));
             return imageViews.get(position);
         }

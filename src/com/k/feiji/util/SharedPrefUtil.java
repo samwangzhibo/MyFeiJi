@@ -45,4 +45,10 @@ public class SharedPrefUtil {
             sharedPreferences.edit().putInt(name, value).commit();
         }
     }
+    public int getBgIm(String name){
+        if (sharedPreferences != null){
+            return sharedPreferences.getInt(name, 0);
+        }
+        return SoundPlayer.musicId;
+    }
 }
