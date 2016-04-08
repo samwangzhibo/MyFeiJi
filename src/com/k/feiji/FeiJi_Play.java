@@ -47,7 +47,7 @@ import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 @SuppressLint("NewApi")
-public class FeiJi_Play extends CCColorLayer {
+public class FeiJi_Play extends CCColorLayer{
 
 	private static final String TAG = FeiJi_Play.class.getSimpleName();
 	private List<FeiJi_Sprite> _Foes = new CopyOnWriteArrayList<FeiJi_Sprite>(); //中小飞机
@@ -1794,11 +1794,11 @@ public class FeiJi_Play extends CCColorLayer {
 				Window window = _Dialog.getWindow();
 				window.setWindowAnimations(R.style.mystyle);
 				_Dialog.show();
-				
+
 				Button _Pause_TV = (Button) v
 						.findViewById(R.id.feiji_pause_resume);
 				_Pause_TV.setOnClickListener(new View.OnClickListener() {
-					
+
 					@Override
 					public void onClick(View v) {
 						_Can_Move = false;
@@ -1809,7 +1809,7 @@ public class FeiJi_Play extends CCColorLayer {
 						isClickPause = false;
 					}
 				});
-				
+
 				Button _Return = (Button) v
 						.findViewById(R.id.feiji_dialog_return);
 				_Return.setOnClickListener(new OnClickListener() {
@@ -1837,7 +1837,7 @@ public class FeiJi_Play extends CCColorLayer {
 				});
 
 				isClickPause = true;
-				
+
 			}
 		});
 	}
@@ -1848,4 +1848,5 @@ public class FeiJi_Play extends CCColorLayer {
 		CCDirector.sharedDirector().getActivity().startActivity(mainScore);*/
 		CCDirector.sharedDirector().getActivity().finish();
 	}
+
 }

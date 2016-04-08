@@ -4,7 +4,6 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.ConfigurationInfo;
 import android.graphics.PixelFormat;
-import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -18,15 +17,12 @@ import com.k.feiji.util.SoundPlayer;
 import org.cocos2d.layers.CCScene;
 import org.cocos2d.nodes.CCDirector;
 import org.cocos2d.nodes.CCTextureCache;
-import org.cocos2d.opengl.CCGLSurfaceView;
 import org.cocos2d.types.ccColor4B;
-
-import javax.microedition.khronos.egl.EGLConfig;
-import javax.microedition.khronos.opengles.GL10;
 
 public class FeiJi_Main extends FeiJi_BaseAc{
 
 	private MyCCGLSurfaceView _FeiJi_Surface;
+	private long lastTime = 0;
 	private CCScene _FeiJi_Scene;
 	SoundPlayer soundPlayer;
 	SharedPrefUtil sharedPrefUtil = SharedPrefUtil.getInstance();
@@ -75,7 +71,6 @@ public class FeiJi_Main extends FeiJi_BaseAc{
 	@Override
 	protected void onResume() {
 		super.onResume();
-		Log.e("wzb","_FeiJi_Surface is isActivated:"+_FeiJi_Surface.isActivated());
 		if (!FeiJi_Play.getIsClickPause()){
 			CCDirector.sharedDirector().resume();
 		}
@@ -121,11 +116,17 @@ public class FeiJi_Main extends FeiJi_BaseAc{
 	
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 
-       /* if (keyCode == KeyEvent.KEYCODE_BACK
+        if (keyCode == KeyEvent.KEYCODE_BACK
                  && event.getRepeatCount() == 0) {
+			 long nowTime = System.currentTimeMillis();
+			 if (nowTime - lastTime < 1000){
+				 return super.onKeyDown(keyCode, event);
+			 }
+			Toast.makeText(FeiJi_Main.this, "再次点击回到主菜单", Toast.LENGTH_SHORT).show();
+			lastTime = System.currentTimeMillis();
              return true;
-         }*/
-		Toast.makeText(this,"back", Toast.LENGTH_LONG).show();
+         }
          return super.onKeyDown(keyCode, event);
      }
+
 }
