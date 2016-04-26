@@ -1,4 +1,4 @@
-package com.k.feiji;
+package com.k.feiji.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -6,6 +6,8 @@ import android.os.Handler;
 import android.widget.ImageView;
 
 import com.baidu.mobstat.StatService;
+import com.k.feiji.FeiJi_BaseAc;
+import com.k.feiji.R;
 
 public class FeiJi_Wel extends FeiJi_BaseAc {
 
@@ -41,6 +43,7 @@ public class FeiJi_Wel extends FeiJi_BaseAc {
 					_FeiJi_Wel_Animal
 							.setBackgroundResource(R.drawable.feiji_back_3);
 				} else {
+					//checkLogin();
 					Intent intent = new Intent(FeiJi_Wel.this, FeiJi_Menu.class);
 					startActivity(intent);
 					finish();

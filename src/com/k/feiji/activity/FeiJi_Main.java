@@ -1,4 +1,4 @@
-package com.k.feiji;
+package com.k.feiji.activity;
 
 import android.app.ActivityManager;
 import android.content.Context;
@@ -10,6 +10,8 @@ import android.view.KeyEvent;
 import android.widget.Toast;
 
 import com.baidu.mobstat.StatService;
+import com.k.feiji.FeiJi_BaseAc;
+import com.k.feiji.FeiJi_Play;
 import com.k.feiji.util.MyCCGLSurfaceView;
 import com.k.feiji.util.SharedPrefUtil;
 import com.k.feiji.util.SoundPlayer;
@@ -19,7 +21,7 @@ import org.cocos2d.nodes.CCDirector;
 import org.cocos2d.nodes.CCTextureCache;
 import org.cocos2d.types.ccColor4B;
 
-public class FeiJi_Main extends FeiJi_BaseAc{
+public class FeiJi_Main extends FeiJi_BaseAc {
 
 	private MyCCGLSurfaceView _FeiJi_Surface;
 	private long lastTime = 0;

@@ -54,7 +54,7 @@
         
         <activity android:name="com.k.feiji.FeiJi_BaseAc" />
         <activity
-            android:name="com.k.feiji.FeiJi_Wel"
+            android:name=".activity.FeiJi_Wel"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -62,8 +62,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.k.feiji.FeiJi_Menu" />
-        <activity android:name="com.k.feiji.FeiJi_Main" />
+        <activity android:name=".activity.FeiJi_Menu"
+            android:launchMode="singleTop"
+            />
+        <activity android:name=".activity.FeiJi_Main" />
         <activity android:name="com.k.feiji.FeiJi_Score"></activity>
     </application>
 

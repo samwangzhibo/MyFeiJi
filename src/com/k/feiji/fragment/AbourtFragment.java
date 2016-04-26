@@ -8,7 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
-import com.k.feiji.FeiJi_Menu;
+import com.k.feiji.activity.FeiJi_Menu;
 import com.k.feiji.R;
 
 /**

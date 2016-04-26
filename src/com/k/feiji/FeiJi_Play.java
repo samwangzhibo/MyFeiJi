@@ -175,7 +175,7 @@ public class FeiJi_Play extends CCColorLayer{
 			});
 	}
 
-	protected FeiJi_Play(ccColor4B color,boolean isgk) {
+	public FeiJi_Play(ccColor4B color, boolean isgk) {
 		super(color);
 		this._IsGK = isgk;
 		CCDirector.sharedDirector().getActivity().runOnUiThread(new Runnable() {

@@ -1,4 +1,4 @@
-package com.k.feiji;
+package com.k.feiji.activity;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -19,6 +19,9 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.baidu.mobstat.StatService;
+import com.k.feiji.FeiJi_BaseAc;
+import com.k.feiji.FeiJi_Score;
+import com.k.feiji.R;
 import com.k.feiji.fragment.AbourtFragment;
 import com.k.feiji.fragment.SettingFragment;
 import com.k.feiji.util.SharedPrefUtil;
@@ -51,6 +54,7 @@ public class FeiJi_Menu extends FeiJi_BaseAc implements OnClickListener{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.feiji_menu);
 		Init();
+		ChangeLoginBtn();
 	}
 
 	private void Init() {
@@ -88,7 +92,14 @@ public class FeiJi_Menu extends FeiJi_BaseAc implements OnClickListener{
 		 */
 		StatService.onResume(this);
 		soundPlayer.startMusic();
-		
+		ChangeLoginBtn();
+	}
+
+	/**
+	 * 改变登录按钮状态
+	 */
+	private void ChangeLoginBtn() {
+
 	}
 
 	public void onPause() {
